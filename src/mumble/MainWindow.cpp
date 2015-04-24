@@ -283,6 +283,8 @@ void MainWindow::setupGui()  {
 	qtvUsers->setRowHidden(0, QModelIndex(), true);
 	qtvUsers->ensurePolished();
 
+	qaServerConnect->setShortcuts(QKeySequence::Open);
+	qaServerDisconnect->setShortcuts(QKeySequence::Close);
 	qaAudioMute->setChecked(g.s.bMute);
 	qaAudioDeaf->setChecked(g.s.bDeaf);
 #ifdef USE_NO_TTS
