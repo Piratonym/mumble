@@ -1264,6 +1264,7 @@ void MainWindow::qmUser_aboutToShow() {
 	if (g.sh && g.sh->uiVersion >= 0x010203)
 		qmUser->addAction(qaUserPrioritySpeaker);
 	qmUser->addAction(qaUserLocalMute);
+	qmUser->addAction(qaUserLocalNoCount);
 	qmUser->addAction(qaUserLocalIgnore);
 
 	if (self)
@@ -1321,6 +1322,7 @@ void MainWindow::qmUser_aboutToShow() {
 		qaUserBan->setEnabled(false);
 		qaUserTextMessage->setEnabled(false);
 		qaUserLocalMute->setEnabled(false);
+		qaUserLocalNoCount->setEnabled(false);
 		qaUserLocalIgnore->setEnabled(false);
 		qaUserCommentReset->setEnabled(false);
 		qaUserTextureReset->setEnabled(false);
@@ -1330,6 +1332,7 @@ void MainWindow::qmUser_aboutToShow() {
 		qaUserBan->setEnabled(! self);
 		qaUserTextMessage->setEnabled(true);
 		qaUserLocalMute->setEnabled(! self);
+		qaUserLocalNoCount->setEnabled(! self);
 		qaUserLocalIgnore->setEnabled(! self);
 		qaUserCommentReset->setEnabled(! p->qbaCommentHash.isEmpty() && (g.pPermissions & (ChanACL::Move | ChanACL::Write)));
 		qaUserTextureReset->setEnabled(! p->qbaTextureHash.isEmpty() && (g.pPermissions & (ChanACL::Move | ChanACL::Write)));
@@ -1339,6 +1342,7 @@ void MainWindow::qmUser_aboutToShow() {
 		qaUserDeaf->setChecked(p->bDeaf);
 		qaUserPrioritySpeaker->setChecked(p->bPrioritySpeaker);
 		qaUserLocalMute->setChecked(p->bLocalMute);
+		qaUserLocalNoCount->setChecked(p->bLocalNoCount);
 		qaUserLocalIgnore->setChecked(p->bLocalIgnore);
 	}
 	updateMenuPermissions();
@@ -1372,6 +1376,33 @@ void MainWindow::on_qaUserLocalMute_triggered() {
 	p->setLocalMute(muted);
 	if (! p->qsHash.isEmpty())
 		Database::setLocalMuted(p->qsHash, muted);
+}
+
+void MainWindow::on_qaUserLocalNoCount_triggered() {
+	ClientUser *p = getContextMenuUser();
+	if (!p)
+		return;
+
+	bool uncounted = qaUserLocalNoCount->isChecked();
+
+	p->setLocalNoCount(uncounted);
+	if (! p->qsHash.isEmpty())
+		Database::setLocalUncounted(p->qsHash, uncounted);
+
+	Channel *c = p->cChannel;
+	ModelItem *citem = ModelItem::c_qhChannels.value(c);
+
+	if (uncounted) {
+		while (citem) {
+			citem->iUsers--;
+			citem = citem->parent;
+		}
+	} else {
+		while (citem) {
+			citem->iUsers++;
+			citem = citem->parent;
+		}
+	}
 }
 
 void MainWindow::on_qaUserLocalIgnore_triggered() {

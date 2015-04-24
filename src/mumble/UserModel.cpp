@@ -872,7 +872,7 @@ ClientUser *UserModel::addUser(unsigned int id, const QString &name) {
 	c->addClientUser(p);
 	endInsertRows();
 
-	while (citem) {
+	while ((! p->bLocalNoCount) && citem) {
 		citem->iUsers++;
 		citem = citem->parent;
 	}
@@ -901,7 +901,7 @@ void UserModel::removeUser(ClientUser *p) {
 	ClientUser::remove(p);
 	qmHashes.remove(p->qsHash);
 
-	while (citem) {
+	while ((! p->bLocalNoCount) && citem) {
 		citem->iUsers--;
 		citem = citem->parent;
 	}
@@ -932,11 +932,11 @@ void UserModel::moveUser(ClientUser *p, Channel *np) {
 		recheckLinks();
 	}
 
-	while (opi) {
+	while ((! p->bLocalNoCount) && opi) {
 		opi->iUsers--;
 		opi = opi->parent;
 	}
-	while (pi) {
+	while ((! p->bLocalNoCount) && pi) {
 		pi->iUsers++;
 		pi = pi->parent;
 	}

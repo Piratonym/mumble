@@ -312,19 +312,10 @@ void UserView::selectSearchResult() {
 	qpmiSearch = QPersistentModelIndex();
 }
 
-bool channelHasUsers(const Channel *c)
+bool channelHasUsers(Channel *c)
 {
-	if(c->qlUsers.isEmpty() == false)
-		return true;
-
-	int i;	
-
-	for(i=0;i<c->qlChannels.count();i++)
-	{
-		if(channelHasUsers(c->qlChannels[i]))
-			return true;
-	}
-	return false;
+	ModelItem *mi = ModelItem::c_qhChannels.value(c);
+	return !(mi->iUsers == 0);
 }
 
 static bool channelFiltered(const Channel *c)

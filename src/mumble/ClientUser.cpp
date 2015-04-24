@@ -47,6 +47,7 @@ ClientUser::ClientUser(QObject *p) : QObject(p),
 		tLastTalkStateChange(false),
 		bLocalIgnore(false),
 		bLocalMute(false),
+		bLocalNoCount(false),
 		fPowerMin(0.0f),
 		fPowerMax(0.0f),
 		fAverageAvailable(0.0f),
@@ -146,6 +147,8 @@ QString ClientUser::getFlagsString() const {
 		flags << ClientUser::tr("Local Ignore (Text messages)");
 	if (bLocalMute)
 		flags << ClientUser::tr("Local Mute");
+	if (bLocalNoCount)
+		flags << ClientUser::tr("Not counted");
 	if (bSelfMute)
 		flags << ClientUser::tr("Muted (self)");
 	if (bSelfDeaf)
@@ -205,6 +208,12 @@ void ClientUser::setLocalMute(bool mute) {
 		return;
 	bLocalMute = mute;
 	emit muteDeafStateChanged();
+}
+
+void ClientUser::setLocalNoCount(bool nocount) {
+	if (bLocalNoCount == nocount)
+		return;
+	bLocalNoCount = nocount;
 }
 
 void ClientUser::setDeaf(bool deaf) {

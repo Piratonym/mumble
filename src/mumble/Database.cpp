@@ -166,6 +166,9 @@ Database::Database() {
 	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `muted` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `hash` TEXT)"));
 	execQueryAndLogFailure(query, QLatin1String("CREATE UNIQUE INDEX IF NOT EXISTS `muted_hash` ON `muted`(`hash`)"));
 
+	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `uncounted` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `hash` TEXT)"));
+	execQueryAndLogFailure(query, QLatin1String("CREATE UNIQUE INDEX IF NOT EXISTS `uncounted_hash` ON `uncounted`(`hash`)"));
+
 	//Note: A previous snapshot version created a table called 'hidden'
 	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `filtered_channels` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `server_cert_digest` TEXT NOT NULL, `channel_id` INTEGER NOT NULL)"));
 	execQueryAndLogFailure(query, QLatin1String("CREATE UNIQUE INDEX IF NOT EXISTS `filtered_channels_entry` ON `filtered_channels`(`server_cert_digest`, `channel_id`)"));
@@ -280,6 +283,29 @@ void Database::setLocalMuted(const QString &hash, bool muted) {
 		query.prepare(QLatin1String("INSERT INTO `muted` (`hash`) VALUES (?)"));
 	else
 		query.prepare(QLatin1String("DELETE FROM `muted` WHERE `hash` = ?"));
+	query.addBindValue(hash);
+	execQueryAndLogFailure(query);
+}
+
+bool Database::isLocalUncounted(const QString &hash) {
+	QSqlQuery query;
+
+	query.prepare(QLatin1String("SELECT `hash` FROM `uncounted` WHERE `hash` = ?"));
+	query.addBindValue(hash);
+	execQueryAndLogFailure(query);
+	while (query.next()) {
+		return true;
+	}
+	return false;
+}
+
+void Database::setLocalUncounted(const QString &hash, bool uncounted) {
+	QSqlQuery query;
+
+	if (uncounted)
+		query.prepare(QLatin1String("INSERT INTO `uncounted` (`hash`) VALUES (?)"));
+	else
+		query.prepare(QLatin1String("DELETE FROM `uncounted` WHERE `hash` = ?"));
 	query.addBindValue(hash);
 	execQueryAndLogFailure(query);
 }

@@ -52,6 +52,7 @@ class ClientUser : public QObject, public User {
 		Timer tLastTalkStateChange;
 		bool bLocalIgnore;
 		bool bLocalMute;
+		bool bLocalNoCount;
 
 		float fPowerMin, fPowerMax;
 		float fAverageAvailable;
@@ -102,6 +103,7 @@ class ClientUser : public QObject, public User {
 		void setSuppress(bool suppress);
 		void setLocalIgnore(bool ignore);
 		void setLocalMute(bool mute);
+		void setLocalNoCount(bool nocount);
 		void setSelfMute(bool mute);
 		void setSelfDeaf(bool deaf);
 		void setPrioritySpeaker(bool priority);
