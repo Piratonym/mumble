@@ -159,7 +159,7 @@ struct OverlaySettings {
 };
 
 struct Settings {
-	enum AudioTransmit { Continous, VAD, PushToTalk };
+	enum AudioTransmit { Continuous, VAD, PushToTalk };
 	enum VADSource { Amplitude, SignalToNoise };
 	enum LoopMode { None, Local, Server };
 	enum ChannelExpand { NoChannels, ChannelsWithUsers, AllChannels };
@@ -204,6 +204,8 @@ struct Settings {
 	bool bAttenuateOthersOnTalk;
 	bool bAttenuateOthers;
 	bool bAttenuateUsersOnPrioritySpeak;
+	bool bOnlyAttenuateSameOutput;
+	bool bAttenuateLoopbacks;
 	int iOutputDelay;
 
 	QString qsALSAInput, qsALSAOutput;
@@ -296,6 +298,9 @@ struct Settings {
 	unsigned short usProxyPort;
 	QString qsRegionalHost;
 
+	// Network settings - SSL
+	QString qsSslCiphers;
+
 	static const int ciDefaultMaxImageSize = 50 * 1024; // Restrict to 50KiB as a default
 	int iMaxImageSize;
 	int iMaxImageWidth;
@@ -333,6 +338,8 @@ struct Settings {
 	LoopMode lmLoopMode;
 	float dPacketLoss;
 	float dMaxPacketDelay;
+	/// If true settings in this structure require a client restart to apply fully
+	bool requireRestartToApply;
 
 	bool doEcho() const;
 	bool doPositionalAudio() const;

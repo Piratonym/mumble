@@ -6,7 +6,7 @@ win32 {
 	# Import dependency paths for windows
 	include(winpaths_default.pri)
 
-	INCLUDEPATH *= "$$BOOST_PATH/include" "$$BOOST_PATH/include/boost-1_49/"
+	INCLUDEPATH *= "$$BOOST_PATH/include"
 	QMAKE_LIBDIR *= "$$OPENSSL_PATH/lib" "$$LIBSNDFILE_PATH/lib" "$$BOOST_PATH/lib"
 	INCLUDEPATH *= "$$OPENSSL_PATH/include" "$$LIBSNDFILE_PATH/include"
 
@@ -45,133 +45,99 @@ win32 {
 		error("The INCLUDE environment variable is not set. Are you not in a build environment?")
 	}
 
-	CONFIG(intelcpp) {
-		DEFINES *= USE_INTEL_IPP
-		DEFINES *= RESTRICT=restrict
-		DEFINES *= VAR_ARRAYS
-		QMAKE_CC = icl
-		QMAKE_CXX = icl
-		QMAKE_LIB = xilib /nologo
-		QMAKE_LINK = xilink
-		QMAKE_CFLAGS *= -Qstd=c99 -Qrestrict -Qvc9
-		QMAKE_CXXFLAGS *= -Qstd=c++0x -Qrestrict -Qvc9
+	QMAKE_CFLAGS_RELEASE *= -Ox /fp:fast
+	QMAKE_CXXFLAGS_RELEASE *= -Ox /fp:fast
 
-		QMAKE_CFLAGS_LTCG =
-		QMAKE_CXXFLAGS_LTCG =
-		QMAKE_LFLAGS_LTCG =
+	equals(QMAKE_TARGET.arch, x86) {
+		QMAKE_LFLAGS_RELEASE -= /SafeSEH
+	}
 
-		QMAKE_CFLAGS_RELEASE *= -O3 -Ot -QxSSE2 -Qprec-div-
-		QMAKE_CFLAGS_RELEASE -=-arch:SSE
-		QMAKE_CFLAGS_RELEASE -= -GL
+	# MSVS 2012 and 2013's cl.exe will generate SSE2 code by default,
+	# unless an explict arch is set.
+	# For our non-64 x86 builds, our binaries should not contain any
+	# SSE2 code, so override the default by using -arch:SSE.
+	equals(QMAKE_TARGET.arch, x86) {
+		QMAKE_CFLAGS_RELEASE *= -arch:SSE
+		QMAKE_CXXFLAGS_RELEASE *= -arch:SSE
+	}
 
-		QMAKE_CXXFLAGS_RELEASE *= -O3 -Ot -QxSSE2 -Qprec-div-
-		QMAKE_CXXFLAGS_RELEASE -=-arch:SSE
-		QMAKE_CXXFLAGS_RELEASE -= -GL
+	# Qt 5.4 uses -Zc:strictStrings by default on MSVS 2013.
+	# TextToSpeech_win.cpp uses sapi.h, which isn't compatible
+	# with the strictStrings option due to bad conversions
+	# in some of its functions's default parameters.
+	QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
+	QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
+	QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO -= -Zc:strictStrings
+	QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -Zc:strictStrings
 
-		QMAKE_CFLAGS_DEBUG *= -O2 -Ob0
-		QMAKE_CXXFLAGS_DEBUG *= -O2 -Ob0
+	# Explicitly set the subsystem versions to
+	# 5.01 (XP) for x86 and 6.00 (Vista) for x64.
+	#
+	# Qt expands the @QMAKE_SUBSYSTEM_SUFFIX@ via
+	# qt_config.prf, which doesn't seem to trigger
+	# for us. So we'll just try our luck.
+	QMAKE_LFLAGS_CONSOLE -= /SUBSYSTEM:CONSOLE
+	QMAKE_LFLAGS_CONSOLE -= /SUBSYSTEM:CONSOLE@QMAKE_SUBSYSTEM_SUFFIX@
+	QMAKE_LFLAGS_WINDOWS -= /SUBSYSTEM:WINDOWS
+	QMAKE_LFLAGS_WINDOWS -= /SUBSYSTEM:WINDOWS@QMAKE_SUBSYSTEM_SUFFIX@
+	!isEmpty(QMAKE_LFLAGS_WINDOWS) {
+		error("QMAKE_LFLAGS_WINDOWS is not empty. Please adjust the pri file.")
+	}
+	!isEmpty(QMAKE_LFLAGS_CONSOLE) {
+		error("QMAKE_LFLAGS_CONSOLE is not empty. Please adjust the pri file.")
+	}
+	equals(QMAKE_TARGET.arch, x86) {
+		QMAKE_LFLAGS_CONSOLE += /SUBSYSTEM:CONSOLE,5.01
+		QMAKE_LFLAGS_WINDOWS += /SUBSYSTEM:WINDOWS,5.01
+	}
+	equals(QMAKE_TARGET.arch, x86_64) {
+		QMAKE_LFLAGS_CONSOLE += /SUBSYSTEM:CONSOLE,6.00
+		QMAKE_LFLAGS_WINDOWS += /SUBSYSTEM:WINDOWS,6.00
+	}
 
-		CONFIG(optgen) {
-			QMAKE_CFLAGS *= -Qprof-gen
-			QMAKE_CXXFLAGS *= -Qprof-gen
-		}
+	CONFIG(analyze) {
+		QMAKE_CFLAGS_DEBUG *= /analyze
+		QMAKE_CXXFLAGS_DEBUG *= /analyze
+		QMAKE_CFLAGS_RELEASE *= /analyze
+		QMAKE_CXXFLAGS_RELEASE *= /analyze
+	}
+	DEFINES *= RESTRICT=
+	CONFIG(sse2) {
+	      QMAKE_CFLAGS_RELEASE -= -arch:SSE
+	      QMAKE_CFLAGS_DEBUG -= -arch:SSE
+	      QMAKE_CFLAGS += -arch:SSE2
+	}
 
-		CONFIG(optimize) {
-			QMAKE_CFLAGS *= -Qprof-use
-			QMAKE_CXXFLAGS *= -Qprof-use
-		}
-	} else {
-		QMAKE_CFLAGS_RELEASE *= -Ox -Ot /fp:fast /Qfast_transcendentals -Ob2
-		QMAKE_CXXFLAGS_RELEASE *= -Ox -Ot /fp:fast /Qfast_transcendentals -Ob2
-		QMAKE_LFLAGS_RELEASE *= /NXCOMPAT /DYNAMICBASE
-		equals(QMAKE_TARGET.arch, x86) {
-			QMAKE_LFLAGS_RELEASE -= /SafeSEH
-		}
+	# Define the CONFIG options 'force-x86-toolchain' and
+	# 'force-x86_64-toolchain'. These can be used to force
+	# the target of a .pro file to be built for a specific
+	# architecture, regardless of the actual architecture
+	# used by the current build environment.
+	FULL_MKSPEC_PATH = $$QMAKESPEC
+	CURRENT_MKSPEC = $$basename(QMAKESPEC)
 
-		# MSVS 2012 and 2013's cl.exe will generate SSE2 code by default,
-		# unless an explict arch is set.
-		# For our non-64 x86 builds, our binaries should not contain any
-		# SSE2 code, so override the default by using -arch:SSE.
-		win32-msvc2012|win32-msvc2013 {
-			equals(QMAKE_TARGET.arch, x86) {
-				QMAKE_CFLAGS_RELEASE *= -arch:SSE
-				QMAKE_CXXFLAGS_RELEASE *= -arch:SSE
-			}
-		}
+	CONFIG(force-x86-toolchain) {
+		include(toolchain/$${CURRENT_MKSPEC}/x86-xp.toolchain)
+	}
 
-		# Qt 5.4 uses -Zc:strictStrings by default on MSVS 2013.
-		# TextToSpeech_win.cpp uses sapi.h, which isn't compatible
-		# with the strictStrings option due to bad conversions
-		# in some of its functions's default parameters.
-		QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
-		QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
-		QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO -= -Zc:strictStrings
-		QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -Zc:strictStrings
-
-		# Explicitly set the subsystem versions to
-		# 5.01 (XP) for x86 and 6.00 (Vista) for x64.
-		#
-		# Qt expands the @QMAKE_SUBSYSTEM_SUFFIX@ via
-		# qt_config.prf, which doesn't seem to trigger
-		# for us. So we'll just try our luck.
-		QMAKE_LFLAGS_CONSOLE -= /SUBSYSTEM:CONSOLE
-		QMAKE_LFLAGS_CONSOLE -= /SUBSYSTEM:CONSOLE@QMAKE_SUBSYSTEM_SUFFIX@
-		QMAKE_LFLAGS_WINDOWS -= /SUBSYSTEM:WINDOWS
-		QMAKE_LFLAGS_WINDOWS -= /SUBSYSTEM:WINDOWS@QMAKE_SUBSYSTEM_SUFFIX@
-		!isEmpty(QMAKE_LFLAGS_WINDOWS) {
-			error("QMAKE_LFLAGS_WINDOWS is not empty. Please adjust the pri file.")
-		}
-		!isEmpty(QMAKE_LFLAGS_CONSOLE) {
-			error("QMAKE_LFLAGS_CONSOLE is not empty. Please adjust the pri file.")
-		}
-		equals(QMAKE_TARGET.arch, x86) {
-			QMAKE_LFLAGS_CONSOLE += /SUBSYSTEM:CONSOLE,5.01
-			QMAKE_LFLAGS_WINDOWS += /SUBSYSTEM:WINDOWS,5.01
-		}
-		equals(QMAKE_TARGET.arch, x86_64) {
-			QMAKE_LFLAGS_CONSOLE += /SUBSYSTEM:CONSOLE,6.00
-			QMAKE_LFLAGS_WINDOWS += /SUBSYSTEM:WINDOWS,6.00
-		}
-
-		CONFIG(analyze) {
-			QMAKE_CFLAGS_DEBUG *= /analyze
-			QMAKE_CXXFLAGS_DEBUG *= /analyze
-			QMAKE_CFLAGS_RELEASE *= /analyze
-			QMAKE_CXXFLAGS_RELEASE *= /analyze
-		}
-		DEFINES *= RESTRICT=
-		CONFIG(sse2) {
-		      QMAKE_CFLAGS_RELEASE -= -arch:SSE
-		      QMAKE_CFLAGS_DEBUG -= -arch:SSE
-		      QMAKE_CFLAGS += -arch:SSE2
-		}
-
-		# Define the CONFIG options 'force-x86-toolchain' and
-		# 'force-x86_64-toolchain'. These can be used to force
-		# the target of a .pro file to be built for a specific
-		# architecture, regardless of the actual architecture
-		# used by the current build environment.
-		FULL_MKSPEC_PATH = $$QMAKESPEC
-		CURRENT_MKSPEC = $$basename(QMAKESPEC)
-
-		CONFIG(force-x86-toolchain) {
-			include(toolchain/$${CURRENT_MKSPEC}/x86-xp.toolchain)
-		}
-
-		CONFIG(force-x86_64-toolchain) {
-			include(toolchain/$${CURRENT_MKSPEC}/x64.toolchain)
-		}
+	CONFIG(force-x86_64-toolchain) {
+		include(toolchain/$${CURRENT_MKSPEC}/x64.toolchain)
 	}
 
 	CONFIG(symbols) {
-		QMAKE_CFLAGS_RELEASE *= -GR -Zi -Oy-
-		QMAKE_CXXFLAGS_RELEASE *= -GR -Zi -Oy-
-
+		# Configure build to be able to properly debug release builds
+		# (https://msdn.microsoft.com/en-us/library/fsk896zz.aspx).
+		# This includes explicitely disabling /Oy to help debugging
+		# (https://msdn.microsoft.com/en-us/library/2kxx5t2c.aspx).
+		# Also set /Zo to enhance optimized debugging
+		# (https://msdn.microsoft.com/en-us/library/dn785163.aspx?f=255&MSPPError=-2147217396).
 		QMAKE_CFLAGS_RELEASE -= -Oy
 		QMAKE_CXXFLAGS_RELEASE -= -Oy
 
-		QMAKE_LFLAGS *= /debug
-		QMAKE_LFLAGS *= /OPT:REF /OPT:ICF
+		QMAKE_CFLAGS_RELEASE *= -GR -Zi -Zo -Oy-
+		QMAKE_CXXFLAGS_RELEASE *= -GR -Zi -Zo -Oy-
+
+		QMAKE_LFLAGS *= /DEBUG /OPT:REF /OPT:ICF /INCREMENTAL:NO
 	}
 
 	CONFIG(vld) {
@@ -210,6 +176,12 @@ unix {
 	}
 }
 
+freebsd-clang {
+	QMAKE_CFLAGS *= -isystem /usr/local/include
+	QMAKE_CXXFLAGS	*= -isystem /usr/local/include
+	QMAKE_LFLAGS *= -L/usr/local/lib -lssl
+}
+
 unix:!macx {
 	CONFIG(debug, debug|release) {
 		QMAKE_CFLAGS *= -fstack-protector -fPIE -pie
@@ -227,7 +199,7 @@ unix:!macx {
 }
 
 macx {
-	SYSTEM_INCLUDES = $$(MUMBLE_PREFIX)/include $$(MUMBLE_PREFIX)/include/boost_1_54_0 $$[QT_INSTALL_HEADERS]
+	SYSTEM_INCLUDES = $$(MUMBLE_PREFIX)/include $$[QT_INSTALL_HEADERS]
 	QMAKE_LIBDIR *= $$(MUMBLE_PREFIX)/lib
 
 	for(inc, $$list($$SYSTEM_INCLUDES)) {

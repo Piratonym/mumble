@@ -364,14 +364,11 @@ ServerItem::~ServerItem() {
 		delete si;
 }
 
-ServerItem *ServerItem::fromMimeData(const QMimeData *mime, QWidget *p) {
+ServerItem *ServerItem::fromMimeData(const QMimeData *mime, bool default_name, QWidget *p) {
 	if (mime->hasFormat(QLatin1String("OriginatedInMumble")))
 		return NULL;
 
 	QUrl url;
-#if QT_VERSION >= 0x050000
-	QUrlQuery query(url);
-#endif
 	if (mime->hasUrls() && ! mime->urls().isEmpty())
 		url = mime->urls().at(0);
 	else if (mime->hasText())
@@ -395,6 +392,10 @@ ServerItem *ServerItem::fromMimeData(const QMimeData *mime, QWidget *p) {
 		}
 	}
 
+#if QT_VERSION >= 0x050000
+	QUrlQuery query(url);
+#endif
+
 	if (! url.isValid() || (url.scheme() != QLatin1String("mumble")))
 		return NULL;
 
@@ -412,7 +413,7 @@ ServerItem *ServerItem::fromMimeData(const QMimeData *mime, QWidget *p) {
 	}
 
 #if QT_VERSION >= 0x050000
-	if (! query.hasQueryItem(QLatin1String("title")))
+	if (! query.hasQueryItem(QLatin1String("title")) && default_name)
 		query.addQueryItem(QLatin1String("title"), url.host());
 
 	ServerItem *si = new ServerItem(query.queryItemValue(QLatin1String("title")), url.host(), static_cast<unsigned short>(url.port(DEFAULT_MUMBLE_PORT)), url.userName(), url.password());
@@ -420,7 +421,7 @@ ServerItem *ServerItem::fromMimeData(const QMimeData *mime, QWidget *p) {
 	if (query.hasQueryItem(QLatin1String("url")))
 		si->qsUrl = query.queryItemValue(QLatin1String("url"));
 #else
-	if (! url.hasQueryItem(QLatin1String("title")))
+	if (! url.hasQueryItem(QLatin1String("title")) && default_name)
 		url.addQueryItem(QLatin1String("title"), url.host());
 
 	ServerItem *si = new ServerItem(url.queryItemValue(QLatin1String("title")), url.host(), static_cast<unsigned short>(url.port(DEFAULT_MUMBLE_PORT)), url.userName(), url.password());
@@ -732,6 +733,7 @@ ConnectDialogEdit::ConnectDialogEdit(QWidget *p, const QString &name, const QStr
 
 	usPort = 0;
 	bOk = true;
+	bCustomLabel = ! name.simplified().isEmpty();
 
 	connect(qleName, SIGNAL(textChanged(const QString &)), this, SLOT(validate()));
 	connect(qleServer, SIGNAL(textChanged(const QString &)), this, SLOT(validate()));
@@ -740,6 +742,29 @@ ConnectDialogEdit::ConnectDialogEdit(QWidget *p, const QString &name, const QStr
 	connect(qlePassword, SIGNAL(textChanged(const QString &)), this, SLOT(validate()));
 
 	validate();
+}
+
+void ConnectDialogEdit::on_qleName_textEdited(const QString& name) {
+	if (bCustomLabel) {
+		// If empty, then reset to automatic label.
+		// NOTE(nik@jnstw.us): You may be tempted to set qleName to qleServer, but that results in the odd
+		// UI behavior that clearing the field doesn't clear it; it'll immediately equal qleServer. Instead,
+		// leave it empty and let it update the next time qleServer updates. Code in accept will default it
+		// to qleServer if it isn't updated beforehand.
+		if (name.simplified().isEmpty()) {
+			bCustomLabel = false;
+		}
+	} else {
+		// If manually edited, set to Custom
+		bCustomLabel = true;
+	}
+}
+
+void ConnectDialogEdit::on_qleServer_textEdited(const QString& server) {
+	// If using automatic label, update it
+	if (!bCustomLabel) {
+		qleName->setText(server);
+	}
 }
 
 void ConnectDialogEdit::validate() {
@@ -765,14 +790,35 @@ void ConnectDialogEdit::validate() {
 		adjustSize();
 	}
 
-	bOk = ! qsName.isEmpty() && ! qsHostname.isEmpty() && ! qsUsername.isEmpty() && usPort;
+	bOk = ! qsHostname.isEmpty() && ! qsUsername.isEmpty() && usPort;
 	qdbbButtonBox->button(QDialogButtonBox::Ok)->setEnabled(bOk);
 }
 
 void ConnectDialogEdit::accept() {
 	validate();
-	if (bOk)
+	if (bOk) {
+		QString server = qleServer->text().simplified();
+
+		// If the user accidentally added a schema or path part, drop it now.
+		// We can't do so during editing as that is quite jarring.
+		const int schemaPos = server.indexOf(QLatin1String("://"));
+		if (schemaPos != -1) {
+			server.remove(0, schemaPos + 3);
+		}
+
+		const int pathPos = server.indexOf(QLatin1Char('/'));
+		if (pathPos != -1) {
+			server.resize(pathPos);
+		}
+
+		qleServer->setText(server);
+
+		if (qleName->text().simplified().isEmpty() || !bCustomLabel) {
+			qleName->setText(server);
+		}
+
 		QDialog::accept();
+	}
 }
 
 void ConnectDialogEdit::on_qcbShowPassword_toggled(bool checked) {
@@ -792,6 +838,7 @@ ConnectDialog::ConnectDialog(QWidget *p, bool autoconnect) : QDialog(p), bAutoCo
 		qlPublicServers.clear();
 	}
 
+	qdbbButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	qdbbButtonBox->button(QDialogButtonBox::Ok)->setText(tr("&Connect"));
 
 	QPushButton *qpbAdd = new QPushButton(tr("&Add New..."), this);
@@ -936,7 +983,7 @@ ConnectDialog::~ConnectDialog() {
 void ConnectDialog::accept() {
 	ServerItem *si = static_cast<ServerItem *>(qtwServers->currentItem());
 	if (! si || si->qlAddresses.isEmpty() || si->qsHostname.isEmpty()) {
-		qWarning() << "Sad panda";
+		qWarning() << "Invalid server";
 		return;
 	}
 
@@ -988,7 +1035,7 @@ void ConnectDialog::on_qaFavoriteAddNew_triggered() {
 
 	// Try to fill out fields if possible
 	{
-		ServerItem *si = ServerItem::fromMimeData(QApplication::clipboard()->mimeData());
+		ServerItem *si = ServerItem::fromMimeData(QApplication::clipboard()->mimeData(), false);
 		if (si) {
 			// If there is server information in the clipboard assume user wants to add it
 			name = si->qsName;

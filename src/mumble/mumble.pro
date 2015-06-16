@@ -4,6 +4,31 @@ DEFINES		*= MUMBLE
 TEMPLATE	= app
 TARGET		= mumble
 
+!CONFIG(qt4-legacy-compat) {
+  CONFIG += no-qt4-legacy-compat
+}
+
+CONFIG(no-qt4-legacy-compat):isEqual(QT_MAJOR_VERSION, 4) {
+  error("$$escape_expand(\\n)$$escape_expand(\\n)"\
+        "Mumble client support for Qt 4 is deprecated and will be dropped$$escape_expand(\\n)"\
+        "completely in the future. We highly recommend switching to$$escape_expand(\\n)"\
+        "building Mumble with Qt 5. For now CONFIG+=qt4-legacy-compat$$escape_expand(\\n)"\
+        "can be used to build with Qt 4. Note that if built this way,$$escape_expand(\\n)"\
+        "Mumble might lack certain bug-fixes and capabilities available$$escape_expand(\\n)"\
+        "when built with Qt 5.$$escape_expand(\\n)"\
+        "$$escape_expand(\\n)")
+}
+
+isEqual(QT_MAJOR_VERSION, 4) {
+  warning("$$escape_expand(\\n)$$escape_expand(\\n)"\
+          "Mumble client support for Qt 4 is deprecated and will be dropped$$escape_expand(\\n)"\
+          "completely in the future. We highly recommend switching to$$escape_expand(\\n)"\
+          "building Mumble with Qt 5. When built with Qt 4, Mumble might$$escape_expand(\\n)"\
+          "lack certain bug-fixes and capabilities available when built$$escape_expand(\\n)"\
+          "with Qt 5 already.$$escape_expand(\\n)"\
+          "$$escape_expand(\\n)")
+}
+
 CONFIG(static) {
   # On Windows, building a static client
   # means building the main app into a DLL.
@@ -243,7 +268,7 @@ isEmpty(QMAKE_LRELEASE) {
   }
 }
 
-unix:!CONFIG(bundled-speex):system(pkg-config --atleast-version=1.2 speexdsp) {
+unix:!CONFIG(bundled-speex):system(pkg-config --atleast-version=1.2 speexdsp):system(pkg-config --atleast-version=1.2 speex) {
   CONFIG	*= no-bundled-speex
 }
 
@@ -265,7 +290,7 @@ CONFIG(no-bundled-speex) {
 }
 
 !CONFIG(no-bundled-speex) {
-  INCLUDEPATH	*= ../../3rdparty/speex-src/include ../../3rdparty/speex-src/libspeex ../../3rdparty/speex-build
+  INCLUDEPATH	*= ../../3rdparty/speex-src/include ../../3rdparty/speex-src/libspeex ../../3rdparty/speex-build ../../3rdparty/speexdsp-src/include ../../3rdparty/speexdsp-src/libspeexdsp
   LIBS 		*= -lspeex
 }
 
@@ -331,7 +356,7 @@ win32 {
   HEADERS	*= GlobalShortcut_win.h Overlay_win.h TaskList.h
   SOURCES	*= GlobalShortcut_win.cpp TextToSpeech_win.cpp Overlay_win.cpp SharedMemory_win.cpp Log_win.cpp os_win.cpp TaskList.cpp ../../overlay/HardHook.cpp ../../overlay/ods.cpp
   LIBS		*= -ldxguid -ldinput8 -lsapi -lole32 -lws2_32 -ladvapi32 -lwintrust -ldbghelp -llibsndfile-1 -lshell32 -lshlwapi -luser32 -lgdi32 -lpsapi
-  LIBS		*= -ldelayimp -delayload:speex.dll -delayload:shell32.dll
+  LIBS		*= -ldelayimp -delayload:shell32.dll
 
   equals(QMAKE_TARGET.arch, x86_64) {
     DEFINES += USE_MINHOOK

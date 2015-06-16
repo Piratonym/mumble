@@ -37,6 +37,8 @@
 #include "Cert.h"
 #include "Log.h"
 #include "Global.h"
+#include "SSL.h"
+
 #include "../../overlay/overlay.h"
 
 bool Shortcut::isServerSpecific() const {
@@ -256,6 +258,8 @@ Settings::Settings() {
 	bAttenuateOthersOnTalk = false;
 	bAttenuateOthers = true;
 	bAttenuateUsersOnPrioritySpeak = false;
+	bOnlyAttenuateSameOutput = false;
+	bAttenuateLoopbacks = false;
 	iMinLoudness = 1000;
 	iVoiceHold = 50;
 	iJitterBufferSize = 1;
@@ -368,6 +372,7 @@ Settings::Settings() {
 	iMaxImageWidth = 1024; // Allow 1024x1024 resolution
 	iMaxImageHeight = 1024;
 	bSuppressIdentity = false;
+	qsSslCiphers = MumbleSSL::defaultOpenSSLCipherString();
 
 	bShowTransmitModeComboBox = false;
 
@@ -399,6 +404,8 @@ Settings::Settings() {
 #endif
 	dPacketLoss = 0;
 	dMaxPacketDelay = 0.0f;
+	
+	requireRestartToApply = false;
 
 	iMaxLogBlocks = 0;
 
@@ -570,6 +577,8 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bAttenuateOthers, "audio/attenuateothers");
 	SAVELOAD(bAttenuateOthersOnTalk, "audio/attenuateothersontalk");
 	SAVELOAD(bAttenuateUsersOnPrioritySpeak, "audio/attenuateusersonpriorityspeak");
+	SAVELOAD(bOnlyAttenuateSameOutput, "audio/onlyattenuatesameoutput");
+	SAVELOAD(bAttenuateLoopbacks, "audio/attenuateloopbacks");
 	LOADENUM(vsVAD, "audio/vadsource");
 	SAVELOAD(fVADmin, "audio/vadmin");
 	SAVELOAD(fVADmax, "audio/vadmax");
@@ -645,6 +654,9 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(iMaxImageWidth, "net/maximagewidth");
 	SAVELOAD(iMaxImageHeight, "net/maximageheight");
 	SAVELOAD(qsRegionalHost, "net/region");
+
+	// Network settings - SSL
+	SAVELOAD(qsSslCiphers, "net/sslciphers");
 
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");
@@ -870,6 +882,8 @@ void Settings::save() {
 	SAVELOAD(bAttenuateOthers, "audio/attenuateothers");
 	SAVELOAD(bAttenuateOthersOnTalk, "audio/attenuateothersontalk");
 	SAVELOAD(bAttenuateUsersOnPrioritySpeak, "audio/attenuateusersonpriorityspeak");
+	SAVELOAD(bOnlyAttenuateSameOutput, "audio/onlyattenuatesameoutput");
+	SAVELOAD(bAttenuateLoopbacks, "audio/attenuateloopbacks");
 	SAVELOAD(vsVAD, "audio/vadsource");
 	SAVELOAD(fVADmin, "audio/vadmin");
 	SAVELOAD(fVADmax, "audio/vadmax");
@@ -944,6 +958,9 @@ void Settings::save() {
 	SAVELOAD(iMaxImageWidth, "net/maximagewidth");
 	SAVELOAD(iMaxImageHeight, "net/maximageheight");
 	SAVELOAD(qsRegionalHost, "net/region");
+
+	// Network settings - SSL
+	SAVELOAD(qsSslCiphers, "net/sslciphers");
 
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");

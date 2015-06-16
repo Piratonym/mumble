@@ -38,6 +38,7 @@
 #include "Server.h"
 #include "OSInfo.h"
 #include "Version.h"
+#include "SSL.h"
 
 MetaParams Meta::mp;
 
@@ -89,6 +90,8 @@ MetaParams::MetaParams() {
 
 	qrUserName = QRegExp(QLatin1String("[-=\\w\\[\\]\\{\\}\\(\\)\\@\\|\\.]+"));
 	qrChannelName = QRegExp(QLatin1String("[ \\-=\\w\\#\\[\\]\\{\\}\\(\\)\\@\\|]+"));
+
+	qsCiphers = MumbleSSL::defaultOpenSSLCipherString();
 
 	qsSettings = NULL;
 }
@@ -238,25 +241,36 @@ void MetaParams::read(QString fname) {
 			}
 		}
 
+#if QT_VERSION >= 0x050000
+		if (hasipv6) {
+			if (SslServer::hasDualStackSupport() && hasipv4) {
+				qlBind << QHostAddress(QHostAddress::Any);
+				hasipv4 = false; // No need to add a separate ipv4 socket
+			} else {
+				qlBind << QHostAddress(QHostAddress::AnyIPv6);
+			}
+		}
+
+		if (hasipv4) {
+			qlBind << QHostAddress(QHostAddress::AnyIPv4);
+		}
+#else // QT_VERSION < 0x050000
+		// For Qt 4 AnyIPv6 resulted in a dual stack socket on dual stack
+		// capable systems while Any resulted in an IPv4 only socket. For
+		// Qt 5 this has been reworked so that AnyIPv6/v4 are now exclusive
+		// IPv6/4 sockets while Any is the dual stack socket.
+
 		if (hasipv6) {
 			qlBind << QHostAddress(QHostAddress::AnyIPv6);
-#ifdef Q_OS_UNIX
-			if (hasipv4) {
-				int s = ::socket(AF_INET6, SOCK_STREAM, 0);
-				if (s != -1) {
-					int ipv6only = 0;
-					socklen_t optlen = sizeof(ipv6only);
-					if (getsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6only, &optlen) == 0) {
-						if (ipv6only == 0)
-							hasipv4 = false;
-					}
-					close(s);
-				}
+			if (SslServer::hasDualStackSupport() && hasipv4) {
+				hasipv4 = false; // No need to add a separate ipv4 socket
 			}
-#endif
 		}
-		if (hasipv4)
+
+		if (hasipv4) {
 			qlBind << QHostAddress(QHostAddress::Any);
+		}
+#endif
 	}
 
 	qsPassword = typeCheckedFromSettings("serverpassword", qsPassword);
@@ -358,6 +372,8 @@ void MetaParams::read(QString fname) {
 	bSendVersion = typeCheckedFromSettings("sendversion", bSendVersion);
 	bAllowPing = typeCheckedFromSettings("allowping", bAllowPing);
 
+	qsCiphers = typeCheckedFromSettings("sslCiphers", qsCiphers);
+
 	QString qsSSLCert = qsSettings->value("sslCert").toString();
 	QString qsSSLKey = qsSettings->value("sslKey").toString();
 	QString qsSSLCA = qsSettings->value("sslCA").toString();
@@ -440,15 +456,20 @@ void MetaParams::read(QString fname) {
 		qFatal("Qt without SSL Support");
 	}
 
-	QList<QSslCipher> pref;
-	foreach(QSslCipher c, QSslSocket::defaultCiphers()) {
-		if (c.usedBits() < 128)
-			continue;
-		pref << c;
+	{
+		QList<QSslCipher> ciphers = MumbleSSL::ciphersFromOpenSSLCipherString(qsCiphers);
+		if (ciphers.isEmpty()) {
+			qFatal("Invalid sslCiphers option. Either the cipher string is invalid or none of the ciphers are available: \"%s\"", qPrintable(qsCiphers));
+		}
+
+		QSslSocket::setDefaultCiphers(ciphers);
+
+		QStringList pref;
+		foreach (QSslCipher c, ciphers) {
+			pref << c.name();
+		}
+		qWarning("Meta: TLS cipher preference is \"%s\"", qPrintable(pref.join(QLatin1String(":"))));
 	}
-	if (pref.isEmpty())
-		qFatal("No SSL ciphers of at least 128 bit found");
-	QSslSocket::setDefaultCiphers(pref);
 
 	qWarning("OpenSSL: %s", SSLeay_version(SSLEAY_VERSION));
 
@@ -488,6 +509,7 @@ void MetaParams::read(QString fname) {
 	qmConfig.insert(QLatin1String("suggestpushtotalk"), qvSuggestPushToTalk.isNull() ? QString() : qvSuggestPushToTalk.toString());
 	qmConfig.insert(QLatin1String("opusthreshold"), QString::number(iOpusThreshold));
 	qmConfig.insert(QLatin1String("channelnestinglimit"), QString::number(iChannelNestingLimit));
+	qmConfig.insert(QLatin1String("sslCiphers"), qsCiphers);
 }
 
 Meta::Meta() {
