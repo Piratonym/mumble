@@ -148,6 +148,10 @@ MainWindow::MainWindow(QWidget *p) : QMainWindow(p) {
 	connect(qmChannel, SIGNAL(aboutToShow()), this, SLOT(qmChannel_aboutToShow()));
 	connect(qteChat, SIGNAL(entered(QString)), this, SLOT(sendChatbarMessage(QString)));
 
+	qagChannelVisibilityFilterGroup = new QActionGroup(this);
+	qagChannelVisibilityFilterGroup->addAction(qaChannelFilterVisibilityNormal);
+	qagChannelVisibilityFilterGroup->addAction(qaChannelFilterVisibilityAlways);
+	qagChannelVisibilityFilterGroup->addAction(qaChannelFilterVisibilityNever);
 
 	// Explicitely add actions to mainwindow so their shortcuts are available
 	// if only the main window is visible (e.g. minimal mode)
@@ -234,7 +238,7 @@ void MainWindow::createActions() {
 	gsSendClipboardTextMessage=new GlobalShortcut(this, idx++, tr("Send Clipboard Text Message", "Global Shortcut"));
 	gsSendClipboardTextMessage->setObjectName(QLatin1String("gsSendClipboardTextMessage"));
 	gsSendClipboardTextMessage->qsWhatsThis = tr("This will send your Clipboard content to the channel you are currently in.", "Global Shortcut");
-
+	
 #ifndef Q_OS_MAC
 	qstiIcon->show();
 #endif
@@ -1904,7 +1908,10 @@ void MainWindow::qmChannel_aboutToShow() {
 	// hiding the root is nonsense
 	if(c && c->cParent) {
 		qmChannel->addSeparator();
-		qmChannel->addAction(qaChannelFilter);
+		QMenu *filter = qmChannel->addMenu(tr("When filtered..."));
+		filter->addAction(qaChannelFilterVisibilityNormal);
+		filter->addAction(qaChannelFilterVisibilityAlways);
+		filter->addAction(qaChannelFilterVisibilityNever);
 	}
 
 #ifndef Q_OS_MAC
@@ -1947,8 +1954,20 @@ void MainWindow::qmChannel_aboutToShow() {
 		}
 	}
 
-	if(c)
-		qaChannelFilter->setChecked(c->bFiltered);
+	if(c) {
+		switch (c->filteredVisibility) {
+		case Channel::FILTERED_VISIBILITY_ALWAYS:
+			qaChannelFilterVisibilityAlways->setChecked(true);
+			break;
+		case Channel::FILTERED_VISIBILITY_NEVER:
+			qaChannelFilterVisibilityNever->setChecked(true);
+			break;
+		case Channel::FILTERED_VISIBILITY_NORMAL:
+		default:
+			qaChannelFilterVisibilityNormal->setChecked(true);
+			break;
+		}
+	}
 
 	qaChannelAdd->setEnabled(add);
 	qaChannelRemove->setEnabled(remove);
@@ -1968,12 +1987,27 @@ void MainWindow::on_qaChannelJoin_triggered() {
 	}
 }
 
-void MainWindow::on_qaChannelFilter_triggered() {
+void MainWindow::on_qaChannelFilterVisibilityAlways_triggered() {
 	Channel *c = getContextMenuChannel();
-	
 	if (c) {
 		UserModel *um = static_cast<UserModel *>(qtvUsers->model());
-		um->toggleChannelFiltered(c);
+		um->updateChannelFilteredVisibility(c, Channel::FILTERED_VISIBILITY_ALWAYS);
+	}
+}
+
+void MainWindow::on_qaChannelFilterVisibilityNever_triggered() {
+	Channel *c = getContextMenuChannel();
+	if (c) {
+		UserModel *um = static_cast<UserModel *>(qtvUsers->model());
+		um->updateChannelFilteredVisibility(c, Channel::FILTERED_VISIBILITY_NEVER);
+	}
+}
+
+void MainWindow::on_qaChannelFilterVisibilityNormal_triggered() {
+	Channel *c = getContextMenuChannel();
+	if (c) {
+		UserModel *um = static_cast<UserModel *>(qtvUsers->model());
+		um->updateChannelFilteredVisibility(c, Channel::FILTERED_VISIBILITY_NORMAL);
 	}
 }
 
@@ -2193,7 +2227,6 @@ void MainWindow::updateMenuPermissions() {
 
 	qaChannelCopyURL->setEnabled(c);
 	qaChannelSendMessage->setEnabled(p & (ChanACL::Write | ChanACL::TextMessage));
-	qaChannelFilter->setEnabled(true);
 	qteChat->setEnabled(p & (ChanACL::Write | ChanACL::TextMessage));
 }
 
@@ -2239,7 +2272,7 @@ void MainWindow::on_qaFilterToggle_triggered() {
 	g.s.bFilterActive = qaFilterToggle->isChecked();
 
 	UserModel *um = static_cast<UserModel *>(qtvUsers->model());
-	um->toggleChannelFiltered(NULL); // force a UI refresh
+	um->notifyDataChanged(); // force a UI refresh
 }
 
 void MainWindow::on_qaAudioMute_triggered() {
@@ -2352,7 +2385,7 @@ void MainWindow::on_qaConfigDialog_triggered() {
 		updateTrayIcon();
 
 		UserModel *um = static_cast<UserModel *>(qtvUsers->model());
-		um->toggleChannelFiltered(NULL); // force a UI refresh
+		um->notifyDataChanged(); // force a UI refresh
 		
 		if (g.s.requireRestartToApply) {
 			if (g.s.requireRestartToApply && QMessageBox::question(
