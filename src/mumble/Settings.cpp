@@ -150,9 +150,9 @@ OverlaySettings::OverlaySettings() {
 	qcFps = Qt::white;
 	fFps = 0.75f;
 	qfFps = qfUserName;
-	qrfFps = QRectF(10, 50, -1, 0.023438f);
+	qrfFps = QRectF(0.0f, 0.05, -1, 0.023438f);
 	bFps = false;
-	qrfTime = QRectF(10, 10, -1, 0.023438f);
+	qrfTime = QRectF(0.0f, 0.0, -1, 0.023438f);
 	bTime = false;
 
 	bUseWhitelist = false;
@@ -283,8 +283,8 @@ Settings::Settings() {
 	bWhisperFriends = false;
 
 	uiDoublePush = 0;
-	uiPTTHold = 0;
-	bExpert = false;
+	pttHold = 0;
+	bExpert = true;
 
 #ifdef NO_UPDATE_CHECK
 	bUpdateCheck = false;
@@ -309,7 +309,7 @@ Settings::Settings() {
 #ifdef Q_OS_WIN
 	// Don't enable minimize to tray by default on Windows >= 7
 	const QSysInfo::WinVersion winVer = QSysInfo::windowsVersion();
-	bHideInTray = (winVer != QSysInfo::WV_WINDOWS7 && winVer != QSysInfo::WV_WINDOWS8 && winVer != QSysInfo::WV_WINDOWS8_1);
+	bHideInTray = (winVer < QSysInfo::WV_WINDOWS7);
 #else
 	const bool isUnityDesktop = QProcessEnvironment::systemEnvironment().value(QLatin1String("XDG_CURRENT_DESKTOP")) == QLatin1String("Unity");
 	bHideInTray = !isUnityDesktop;
@@ -412,7 +412,9 @@ Settings::Settings() {
 	bShortcutEnable = true;
 	bSuppressMacEventTapWarning = false;
 	bEnableEvdev = false;
-	
+	bEnableXInput2 = true;
+	bEnableGKey = true;
+
 	for (int i=Log::firstMsgType; i<=Log::lastMsgType; ++i) {
 		qmMessages.insert(i, Settings::LogConsole | Settings::LogBalloon | Settings::LogTTS);
 		qmMessageSounds.insert(i, QString());
@@ -442,6 +444,11 @@ Settings::Settings() {
 	qmMessages[Log::UserKicked] = Settings::LogConsole;
 	qmMessages[Log::OtherSelfMute] = Settings::LogConsole;
 	qmMessages[Log::OtherMutedOther] = Settings::LogConsole;
+	qmMessages[Log::UserRenamed] = Settings::LogConsole;
+	
+	// Default theme
+	themeName = QLatin1String("Mumble");
+	themeStyleName = QLatin1String("Lite");
 }
 
 bool Settings::doEcho() const {
@@ -543,6 +550,7 @@ void OverlaySettings::load(QSettings* settings_ptr) {
 	SAVELOAD(qrfMutedDeafened, "mutedrect");
 	SAVELOAD(qrfAvatar, "avatarrect");
 	SAVELOAD(qrfFps, "fpsrect");
+	SAVELOAD(qrfTime, "timerect");
 
 	LOADFLAG(qaUserName, "useralign");
 	LOADFLAG(qaChannel, "channelalign");
@@ -566,7 +574,7 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bDeaf, "audio/deaf");
 	LOADENUM(atTransmit, "audio/transmit");
 	SAVELOAD(uiDoublePush, "audio/doublepush");
-	SAVELOAD(uiPTTHold, "audio/ptthold");
+	SAVELOAD(pttHold, "audio/ptthold");
 	SAVELOAD(bTxAudioCue, "audio/pushclick");
 	SAVELOAD(qsTxAudioCueOn, "audio/pushclickon");
 	SAVELOAD(qsTxAudioCueOff, "audio/pushclickoff");
@@ -660,8 +668,8 @@ void Settings::load(QSettings* settings_ptr) {
 
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");
-	SAVELOAD(qsStyle, "ui/style");
-	SAVELOAD(qsSkin, "ui/skin");
+	SAVELOAD(themeName, "ui/theme");
+	SAVELOAD(themeStyleName, "ui/themestyle");
 	LOADENUM(ceExpand, "ui/expand");
 	LOADENUM(ceChannelDrag, "ui/drag");
 	LOADENUM(aotbAlwaysOnTop, "ui/alwaysontop");
@@ -730,6 +738,8 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bShortcutEnable, "shortcut/enable");
 	SAVELOAD(bSuppressMacEventTapWarning, "shortcut/mac/suppresswarning");
 	SAVELOAD(bEnableEvdev, "shortcut/linux/evdev/enable");
+	SAVELOAD(bEnableXInput2, "shortcut/x11/xinput2/enable");
+	SAVELOAD(bEnableGKey, "shortcut/gkey");
 
 	int nshorts = settings_ptr->beginReadArray(QLatin1String("shortcuts"));
 	for (int i=0; i<nshorts; i++) {
@@ -849,6 +859,7 @@ void OverlaySettings::save(QSettings* settings_ptr) {
 	SAVELOAD(qrfMutedDeafened, "mutedrect");
 	SAVELOAD(qrfAvatar, "avatarrect");
 	SAVELOAD(qrfFps, "fpsrect");
+	SAVELOAD(qrfTime, "timerect");
 
 	SAVEFLAG(qaUserName, "useralign");
 	SAVEFLAG(qaChannel, "channelalign");
@@ -871,7 +882,7 @@ void Settings::save() {
 	SAVELOAD(bDeaf, "audio/deaf");
 	SAVELOAD(atTransmit, "audio/transmit");
 	SAVELOAD(uiDoublePush, "audio/doublepush");
-	SAVELOAD(uiPTTHold, "audio/ptthold");
+	SAVELOAD(pttHold, "audio/ptthold");
 	SAVELOAD(bTxAudioCue, "audio/pushclick");
 	SAVELOAD(qsTxAudioCueOn, "audio/pushclickon");
 	SAVELOAD(qsTxAudioCueOff, "audio/pushclickoff");
@@ -964,8 +975,8 @@ void Settings::save() {
 
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");
-	SAVELOAD(qsStyle, "ui/style");
-	SAVELOAD(qsSkin, "ui/skin");
+	SAVELOAD(themeName, "ui/theme");
+	SAVELOAD(themeStyleName, "ui/themestyle");
 	SAVELOAD(ceExpand, "ui/expand");
 	SAVELOAD(ceChannelDrag, "ui/drag");
 	SAVELOAD(aotbAlwaysOnTop, "ui/alwaysontop");
@@ -1030,7 +1041,8 @@ void Settings::save() {
 
 	SAVELOAD(bShortcutEnable, "shortcut/enable");
 	SAVELOAD(bSuppressMacEventTapWarning, "shortcut/mac/suppresswarning");
-	SAVELOAD(bSuppressMacEventTapWarning, "shortcut/linux/evdev/enable");
+	SAVELOAD(bEnableEvdev, "shortcut/linux/evdev/enable");
+	SAVELOAD(bEnableXInput2, "shortcut/x11/xinput2/enable");
 
 	settings_ptr->beginWriteArray(QLatin1String("shortcuts"));
 	int idx = 0;

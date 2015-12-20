@@ -175,11 +175,11 @@ void ConfigDialog::on_qcbExpert_clicked(bool b) {
 	qlwIcons->clear();
 
 	QFontMetrics qfm(qlwIcons->font());
-	int width = 0;
+	int configNavbarWidth = 0;
 
 	foreach(ConfigWidget *cw, qmWidgets) {
 		bool showit = cw->expert(b);
-		width = qMax(width, qfm.width(cw->title()));
+		configNavbarWidth = qMax(configNavbarWidth, qfm.width(cw->title()));
 		if (showit || b)  {
 			QListWidgetItem *i = new QListWidgetItem(qlwIcons);
 			i->setIcon(cw->icon());
@@ -194,10 +194,10 @@ void ConfigDialog::on_qcbExpert_clicked(bool b) {
 	}
 
 	// Add space for icon and some padding.
-	width += qlwIcons->iconSize().width() + 25;
+	configNavbarWidth += qlwIcons->iconSize().width() + 25;
 
-	qlwIcons->setMinimumWidth(width);
-	qlwIcons->setMaximumWidth(width);
+	qlwIcons->setMinimumWidth(configNavbarWidth);
+	qlwIcons->setMaximumWidth(configNavbarWidth);
 
 	if (sel)
 		qlwIcons->setCurrentItem(sel);
@@ -216,15 +216,6 @@ void ConfigDialog::apply() {
 	foreach(ConfigWidget *cw, qmWidgets)
 		cw->accept();
 	
-	if (g.s.requireRestartToApply && QMessageBox::question(
-		        this,
-		        tr("Restart Mumble?"),
-		        tr("Some settings will only apply after a restart of Mumble. Restart Mumble now?"),
-		        QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-		
-		qApp->exit(MUMBLE_EXIT_CODE_RESTART);
-	}
-
 	if (!g.s.bAttenuateOthersOnTalk)
 		g.bAttenuateOthers = false;
 

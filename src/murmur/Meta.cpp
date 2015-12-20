@@ -40,6 +40,10 @@
 #include "Version.h"
 #include "SSL.h"
 
+#if defined(USE_QSSLDIFFIEHELLMANPARAMETERS)
+# include <QSslDiffieHellmanParameters>
+#endif
+
 MetaParams Meta::mp;
 
 #ifdef Q_OS_WIN
@@ -55,12 +59,16 @@ MetaParams::MetaParams() {
 	iMaxUsersPerChannel = 0;
 	iMaxTextMessageLength = 5000;
 	iMaxImageMessageLength = 131072;
+#if OPENSSL_VERSION_NUMBER <= 0x00090900fL
+	legacyPasswordHash = true;
+#else
 	legacyPasswordHash = false;
+#endif
 	kdfIterations = -1;
 	bAllowHTML = true;
 	iDefaultChan = 0;
 	bRememberChan = true;
-	qsWelcomeText = QString("Welcome to this server");
+	qsWelcomeText = QString();
 	qsDatabase = QString();
 	iDBPort = 0;
 	qsDBusService = "net.sourceforge.mumble.murmur";
@@ -278,7 +286,11 @@ void MetaParams::read(QString fname) {
 	iTimeout = typeCheckedFromSettings("timeout", iTimeout);
 	iMaxTextMessageLength = typeCheckedFromSettings("textmessagelength", iMaxTextMessageLength);
 	iMaxImageMessageLength = typeCheckedFromSettings("imagemessagelength", iMaxImageMessageLength);
+#if OPENSSL_VERSION_NUMBER <= 0x00090900fL
+	legacyPasswordHash = true;
+#else
 	legacyPasswordHash = typeCheckedFromSettings("legacypasswordhash", legacyPasswordHash);
+#endif
 	kdfIterations = typeCheckedFromSettings("kdfiterations", -1);
 	bAllowHTML = typeCheckedFromSettings("allowhtml", bAllowHTML);
 	iMaxBandwidth = typeCheckedFromSettings("bandwidth", iMaxBandwidth);
@@ -377,6 +389,7 @@ void MetaParams::read(QString fname) {
 	QString qsSSLCert = qsSettings->value("sslCert").toString();
 	QString qsSSLKey = qsSettings->value("sslKey").toString();
 	QString qsSSLCA = qsSettings->value("sslCA").toString();
+	QString qsSSLDHParams = qsSettings->value("sslDHParams").toString();
 
 	qbaPassPhrase = qsSettings->value("sslPassPhrase").toByteArray();
 
@@ -396,7 +409,7 @@ void MetaParams::read(QString fname) {
 		}
 	}
 
-	QByteArray crt, key;
+	QByteArray crt, key, dhparams;
 
 	if (! qsSSLCert.isEmpty()) {
 		QFile pem(qsSSLCert);
@@ -452,6 +465,31 @@ void MetaParams::read(QString fname) {
 		}
 	}
 
+#if defined(USE_QSSLDIFFIEHELLMANPARAMETERS)
+	if (! qsSSLDHParams.isEmpty()) {
+		QFile pem(qsSSLDHParams);
+		if (pem.open(QIODevice::ReadOnly)) {
+			dhparams = pem.readAll();
+			pem.close();
+		} else {
+			qCritical("Failed to read %s", qPrintable(qsSSLDHParams));
+		}
+	}
+
+	if (! dhparams.isEmpty()) {
+		QSslDiffieHellmanParameters qdhp = QSslDiffieHellmanParameters(dhparams);
+		if (qdhp.isValid()) {
+			qbaDHParams = dhparams;
+		} else {
+			qFatal("Unable to use specified Diffie-Hellman parameters: %s", qPrintable(qdhp.errorString()));
+		}
+	}
+#else
+	if (! qsSSLDHParams.isEmpty()) {
+		qFatal("This version of Murmur does not support Diffie-Hellman parameters (sslDHParams). Murmur will not start unless you remove the option from your murmur.ini file.");
+	}
+#endif
+
 	if (! QSslSocket::supportsSsl()) {
 		qFatal("Qt without SSL Support");
 	}
@@ -462,16 +500,41 @@ void MetaParams::read(QString fname) {
 			qFatal("Invalid sslCiphers option. Either the cipher string is invalid or none of the ciphers are available: \"%s\"", qPrintable(qsCiphers));
 		}
 
-		QSslSocket::setDefaultCiphers(ciphers);
+		// If the version of Qt we're building against doesn't support
+		// QSslDiffieHellmanParameters, then we must filter out Diffie-
+		// Hellman cipher suites in order to guarantee that we do not
+		// use Qt's default Diffie-Hellman parameters.
+		QList<QSslCipher> filtered;
+#if !defined(USE_QSSLDIFFIEHELLMANPARAMETERS)
+		foreach (QSslCipher c, ciphers) {
+			if (c.keyExchangeMethod() == QLatin1String("DH")) {
+				continue;
+			}
+			filtered << c;
+		}
+		if (ciphers.size() != filtered.size()) {
+			qWarning("Warning: all cipher suites in sslCiphers using Diffie-Hellman key exchange "
+			         "have been removed. Qt %s does not support custom Diffie-Hellman parameters.",
+				 qVersion());
+		}
+#else
+		filtered = ciphers;
+#endif
+
+		QSslSocket::setDefaultCiphers(filtered);
 
 		QStringList pref;
-		foreach (QSslCipher c, ciphers) {
+		foreach (QSslCipher c, filtered) {
 			pref << c.name();
 		}
 		qWarning("Meta: TLS cipher preference is \"%s\"", qPrintable(pref.join(QLatin1String(":"))));
 	}
 
 	qWarning("OpenSSL: %s", SSLeay_version(SSLEAY_VERSION));
+
+#if OPENSSL_VERSION_NUMBER <= 0x00090900fL
+	qWarning("Meta: PBKDF2 support is disabled. Using legacy password hashing.");
+#endif
 
 	qmConfig.clear();
 	QStringList hosts;
@@ -510,6 +573,7 @@ void MetaParams::read(QString fname) {
 	qmConfig.insert(QLatin1String("opusthreshold"), QString::number(iOpusThreshold));
 	qmConfig.insert(QLatin1String("channelnestinglimit"), QString::number(iChannelNestingLimit));
 	qmConfig.insert(QLatin1String("sslCiphers"), qsCiphers);
+	qmConfig.insert(QLatin1String("sslDHParams"), QString::fromLatin1(qbaDHParams.constData()));
 }
 
 Meta::Meta() {
@@ -589,7 +653,7 @@ bool Meta::boot(int srvnum) {
 			}
 		}
 		if (r.rlim_cur < sockets)
-			qCritical("Current booted servers require minimum %d file descriptors when all slots are full, but only %ld file descriptors are allowed for this process. Your server will crash and burn; read the FAQ for details.", sockets, r.rlim_cur);
+			qCritical("Current booted servers require minimum %d file descriptors when all slots are full, but only %lu file descriptors are allowed for this process. Your server will crash and burn; read the FAQ for details.", sockets, static_cast<unsigned long>(r.rlim_cur));
 	}
 #endif
 

@@ -62,6 +62,8 @@ class Database : public QObject {
 
 		static bool isLocalUncounted(const QString &hash);
 		static void setLocalUncounted(const QString &hash, bool uncounted);
+		static float getUserLocalVolume(const QString &hash);
+		static void setUserLocalVolume(const QString &hash, float volume);
 
 		static bool isChannelFiltered(const QByteArray &server_cert_digest, const int channel_id);
 		static void setChannelFiltered(const QByteArray &server_cert_digest, const int channel_id, bool hidden);

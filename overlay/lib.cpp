@@ -33,6 +33,8 @@
 #include "overlay_blacklist.h"
 #include "overlay_exe/overlay_exe.h"
 
+#undef max // for std::numeric_limits<T>::max()
+
 static HANDLE hMapObject = NULL;
 static HANDLE hHookMutex = NULL;
 static HHOOK hhookWnd = 0;
@@ -586,7 +588,7 @@ static bool dllmainProcAttachCheckProcessIsBlacklisted(char procname[], char *p)
 					onwhitelist = true;
 					break;
 				}
-				pos += strlen(buffer + pos) + 1;
+				pos += static_cast<unsigned int>(strlen(buffer + pos)) + 1;
 			}
 
 			if (!onwhitelist) {
@@ -602,7 +604,7 @@ static bool dllmainProcAttachCheckProcessIsBlacklisted(char procname[], char *p)
 					bBlackListed = TRUE;
 					return true;
 				}
-				pos += strlen(buffer + pos) + 1;
+				pos += static_cast<unsigned int>(strlen(buffer + pos)) + 1;
 			}
 		}
 	} else {
@@ -641,7 +643,7 @@ static bool dllmainProcAttachCheckProcessIsBlacklisted(char procname[], char *p)
 	// Same buffersize as procname; which we copy from.
 	char fname[PROCNAMEFILEPATH_EXTENDED_BUFFER_BUFLEN];
 
-	int pathlength = p - procname;
+	size_t pathlength = static_cast<size_t>(p - procname);
 	p = fname + pathlength;
 	strncpy_s(fname, sizeof(fname), procname, pathlength + 1);
 
@@ -817,5 +819,14 @@ int GetFnOffsetInModule(voidFunc fnptr, wchar_t *refmodulepath, unsigned int ref
 
 	unsigned char *fn = reinterpret_cast<unsigned char *>(fnptr);
 	unsigned char *base = reinterpret_cast<unsigned char *>(hModule);
-	return fn - base;
+	unsigned long off = static_cast<unsigned long>(fn - base);
+
+	// XXX: convert this function to use something other than int.
+	// Issue mumble-voip/mumble#1924.
+	if (off > static_cast<unsigned long>(std::numeric_limits<int>::max())) {
+		ods("Internal overlay error: GetFnOffsetInModule() offset greater than return type can hold.");
+		return -1;
+	}
+
+	return static_cast<int>(off);
 }

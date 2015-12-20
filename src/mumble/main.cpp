@@ -57,6 +57,7 @@
 #include "SocketRPC.h"
 #include "MumbleApplication.h"
 #include "ApplicationPalette.h"
+#include "Themes.h"
 
 #if defined(USE_STATIC_QT_PLUGINS) && QT_VERSION < 0x050000
 Q_IMPORT_PLUGIN(qtaccessiblewidgets)
@@ -312,26 +313,7 @@ int main(int argc, char **argv) {
 
 	ApplicationPalette applicationPalette;
 	
-	if (! g.s.qsStyle.isEmpty()) {
-		a.setStyle(g.s.qsStyle);
-		g.qsCurrentStyle = g.s.qsStyle;
-	}
-	
-	if (! g.s.qsSkin.isEmpty()) {
-		QFile file(g.s.qsSkin);
-		file.open(QFile::ReadOnly);
-		QString styleSheet=QLatin1String(file.readAll());
-		if (! styleSheet.isEmpty()) {
-			QFileInfo fi(g.s.qsSkin);
-			QDir::addSearchPath(QLatin1String("skin"), fi.path());
-			a.setStyleSheet(styleSheet);
-		}
-	} else {
-		a.setStyleSheet(MainWindow::defaultStyleSheet);
-	}
-
-	QDir::addSearchPath(QLatin1String("skin"),QLatin1String(":/"));
-	QDir::addSearchPath(QLatin1String("translation"), QLatin1String(":/"));
+	Themes::apply();
 
 	QString qsSystemLocale = QLocale::system().name();
 
@@ -346,19 +328,32 @@ int main(int argc, char **argv) {
 	qWarning("Locale is \"%s\" (System: \"%s\")", qPrintable(locale), qPrintable(qsSystemLocale));
 
 	QTranslator translator;
-	if (translator.load(QLatin1String("translation:mumble_") + locale))
+	if (translator.load(QLatin1String(":mumble_") + locale))
 		a.installTranslator(&translator);
 
 	QTranslator loctranslator;
 	if (loctranslator.load(QLatin1String("mumble_") + locale, a.applicationDirPath()))
-		a.installTranslator(&loctranslator);
+		a.installTranslator(&loctranslator); // Can overwrite strings from bundled mumble translation
 
+	// With modularization of Qt 5 some - but not all - of the qt_<locale>.ts files have become
+	// so-called meta catalogues which no longer contain actual translations but refer to other
+	// more specific ts files like qtbase_<locale>.ts . To successfully load a meta catalogue all
+	// of its referenced translations must be available. As we do not want to bundle them all
+	// we now try to load the old qt_<locale>.ts file first and then fall back to loading
+	// qtbase_<locale>.ts if that failed.
+	//
+	// See http://doc.qt.io/qt-5/linguist-programmers.html#deploying-translations for more information
 	QTranslator qttranslator;
-	if (qttranslator.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QLatin1String("/qt_") + locale))
+	if (qttranslator.load(QLatin1String("qt_") + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) { // Try system qt translations
 		a.installTranslator(&qttranslator);
-	else if (qttranslator.load(QLatin1String("translation:qt_") + locale))
+	} else if (qttranslator.load(QLatin1String("qtbase_") + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
 		a.installTranslator(&qttranslator);
-
+	} else if (qttranslator.load(QLatin1String(":qt_") + locale)) { // Try bundled translations
+		a.installTranslator(&qttranslator);
+	} else if (qttranslator.load(QLatin1String(":qtbase_") + locale)) {
+		a.installTranslator(&qttranslator);
+	}
+	
 	if (g.s.qsRegionalHost.isEmpty()) {
 		g.s.qsRegionalHost = qsSystemLocale;
 		g.s.qsRegionalHost = g.s.qsRegionalHost.remove(QRegExp(QLatin1String("^.+_"))).toLower() + QLatin1String(".mumble.info");
@@ -575,7 +570,27 @@ int main(int argc, char **argv) {
 		
 		qWarning() << "Triggering restart of Mumble with arguments: " << arguments;
 		
-		if(!QProcess::startDetached(qApp->applicationFilePath(), arguments)) {
+#ifdef Q_OS_WIN
+		// Work around bug related to QTBUG-7645. Mumble has uiaccess=true set
+		// on windows which makes normal CreateProcess calls (like Qt uses in
+		// startDetached) fail unless they specifically enable additional priviledges.
+		// Note that we do not actually require user interaction by UAC nor full admin
+		// rights but only the right token on launch. Here we use ShellExecuteEx
+		// which handles this transparently for us.
+		const std::wstring applicationFilePath = qApp->applicationFilePath().toStdWString();
+		const std::wstring argumentsString = arguments.join(QLatin1String(" ")).toStdWString();
+		
+		SHELLEXECUTEINFO si;
+		ZeroMemory(&si, sizeof(SHELLEXECUTEINFO));
+		si.cbSize = sizeof(SHELLEXECUTEINFO);
+		si.lpFile = applicationFilePath.data();
+		si.lpParameters = argumentsString.data();
+		
+		bool ok = (ShellExecuteEx(&si) == TRUE);
+#else
+		bool ok = QProcess::startDetached(qApp->applicationFilePath(), arguments);
+#endif
+		if(!ok) {
 			QMessageBox::warning(NULL,
 			                     QApplication::tr("Failed to restart mumble"),
 			                     QApplication::tr("Mumble failed to restart itself. Please restart it manually.")

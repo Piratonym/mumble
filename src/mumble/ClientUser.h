@@ -56,6 +56,7 @@ class ClientUser : public QObject, public User {
 
 		float fPowerMin, fPowerMax;
 		float fAverageAvailable;
+		float fLocalVolume;
 
 #ifdef REPORT_JITTER
 		QMutex qmTiming;

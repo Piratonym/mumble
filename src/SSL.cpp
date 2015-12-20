@@ -35,7 +35,7 @@
 #include "Version.h"
 
 QString MumbleSSL::defaultOpenSSLCipherString() {
-	return QLatin1String("EECDH+AESGCM:AES256-SHA:AES128-SHA");
+	return QLatin1String("EECDH+AESGCM:EDH+aRSA+AESGCM:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES256-SHA:AES128-SHA");
 }
 
 QList<QSslCipher> MumbleSSL::ciphersFromOpenSSLCipherString(QString cipherString) {
@@ -55,7 +55,8 @@ QList<QSslCipher> MumbleSSL::ciphersFromOpenSSLCipherString(QString cipherString
 		goto out;
 	}
 
-	ctx = SSL_CTX_new(meth);
+	// We use const_cast to be compatible with OpenSSL 0.9.8.
+	ctx = SSL_CTX_new(const_cast<SSL_METHOD *>(meth));
 	if (ctx == NULL) {
 		qWarning("MumbleSSL: unable to allocate SSL_CTX");
 		goto out;
@@ -249,4 +250,25 @@ void MumbleSSL::addSystemCA() {
 		qWarning("SSL: CA certificate filter applied. Filtered size: %i, original size: %i", filteredCaList.size(), caList.size());
 	}
 #endif
+}
+
+QString MumbleSSL::protocolToString(QSsl::SslProtocol protocol) {
+	switch(protocol) {
+		case QSsl::SslV3: return QLatin1String("SSL 3");
+		case QSsl::SslV2: return QLatin1String("SSL 2");
+#if QT_VERSION >= 0x050000
+		case QSsl::TlsV1_0: return QLatin1String("TLS 1.0");
+		case QSsl::TlsV1_1: return QLatin1String("TLS 1.1");
+		case QSsl::TlsV1_2: return QLatin1String("TLS 1.2");
+#else
+		case QSsl::TlsV1: return  QLatin1String("TLS 1.0");
+#endif
+		case QSsl::AnyProtocol: return QLatin1String("AnyProtocol");
+#if QT_VERSION >= 0x040800
+		case QSsl::TlsV1SslV3: return QLatin1String("TlsV1SslV3");
+		case QSsl::SecureProtocols: return QLatin1String("SecureProtocols");
+#endif
+		default:
+		case QSsl::UnknownProtocol: return QLatin1String("UnknownProtocol");
+	}
 }

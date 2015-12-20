@@ -103,8 +103,8 @@ public:
 	bool bAllowHTML;
 	unsigned int uiMessageLength;
 	unsigned int uiImageLength;
+	unsigned int uiMaxUsers;
 	bool bQuit;
-	QString qsCurrentStyle;
 
 	bool bHappyEaster;
 	static const char ccHappyEaster[];

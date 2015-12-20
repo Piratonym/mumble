@@ -45,6 +45,15 @@ win32 {
 		error("The INCLUDE environment variable is not set. Are you not in a build environment?")
 	}
 
+	!CONFIG(no-warnings-as-errors) {
+		QMAKE_CFLAGS *= -WX
+		QMAKE_CXXFLAGS *= -WX
+	}
+
+	# Increase PCH heap to 150MB: https://msdn.microsoft.com/en-us/library/bdscwf1c.aspx
+	QMAKE_CFLAGS *= -Zm200
+	QMAKE_CXXFLAGS *= -Zm200
+
 	QMAKE_CFLAGS_RELEASE *= -Ox /fp:fast
 	QMAKE_CXXFLAGS_RELEASE *= -Ox /fp:fast
 
@@ -151,11 +160,21 @@ win32 {
 
 unix {
 	DEFINES *= RESTRICT=__restrict__
-	QMAKE_CFLAGS *= -Wfatal-errors -fvisibility=hidden
-	QMAKE_CXXFLAGS *= -Wfatal-errors -fvisibility=hidden
-	!CONFIG(quiet-build-log) {
-		QMAKE_CFLAGS *= -Wshadow -Wconversion -Wsign-compare
-		QMAKE_CXXFLAGS *= -Wshadow -Woverloaded-virtual -Wold-style-cast -Wconversion -Wsign-compare
+	QMAKE_CFLAGS *= -fvisibility=hidden
+	QMAKE_CXXFLAGS *= -fvisibility=hidden
+	QMAKE_OBJECTIVE_CFLAGS *= -fvisibility=hidden
+	QMAKE_OBJECTIVE_CXXFLAGS *= -fvisibility=hidden
+
+	QMAKE_CFLAGS	         *= -Wall -Wextra
+	QMAKE_CXXFLAGS           *= -Wall -Wextra
+	QMAKE_OBJECTIVE_CFLAGS   *= -Wall -Wextra
+	QMAKE_OBJECTIVE_CXXFLAGS *= -Wall -Wextra
+
+	!CONFIG(no-warnings-as-errors) {
+		QMAKE_CFLAGS	         *= -Werror
+		QMAKE_CXXFLAGS	         *= -Werror
+		QMAKE_OBJECTIVE_CFLAGS   *= -Werror
+		QMAKE_OBJECTIVE_CXXFLAGS *= -Werror
 	}
 
 	CONFIG(opt-gcc) {
@@ -167,29 +186,49 @@ unix {
 	CONFIG(optgen) {
 		QMAKE_CFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-generate
 		QMAKE_CXXFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-generate
+		QMAKE_OBJECTIVE_CFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-generate
+		QMAKE_OBJECTIVE_CXXFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-generate
 		QMAKE_LFLAGS *= -fprofile-generate
 	}
 
 	CONFIG(optimize) {
 		QMAKE_CFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-use
 		QMAKE_CXXFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-use
+		QMAKE_OBJECTIVE_CFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-use
+		QMAKE_OBJECTIVE_CXXFLAGS *= -O3 -march=native -ffast-math -ftree-vectorize -fprofile-use
 	}
 }
 
-freebsd-clang {
+freebsd {
 	QMAKE_CFLAGS *= -isystem /usr/local/include
-	QMAKE_CXXFLAGS	*= -isystem /usr/local/include
-	QMAKE_LFLAGS *= -L/usr/local/lib -lssl
+	QMAKE_CXXFLAGS *= -isystem /usr/local/include
+	QMAKE_LIBDIR *= /usr/lib
+	QMAKE_LIBDIR *= /usr/local/lib
 }
 
 unix:!macx {
-	CONFIG(debug, debug|release) {
-		QMAKE_CFLAGS *= -fstack-protector -fPIE -pie
-		QMAKE_CXXFLAGS *= -fstack-protector -fPIE -pie
-		QMAKE_LFLAGS = -Wl,--no-add-needed
+	# If we're building in a Mumble build environment,
+	# add its include and lib dirs to the build configuration.
+	MUMBLE_PREFIX=$$(MUMBLE_PREFIX)
+	!isEmpty(MUMBLE_PREFIX) {
+		SYSTEM_INCLUDES = $$(MUMBLE_PREFIX)/include $$[QT_INSTALL_HEADERS]
+		QMAKE_LIBDIR *= $$(MUMBLE_PREFIX)/lib
+
+		for(inc, $$list($$SYSTEM_INCLUDES)) {
+			QMAKE_CFLAGS += -isystem $$inc
+			QMAKE_CXXFLAGS += -isystem $$inc
+		}
 	}
 
-	DEFINES *= _FORTIFY_SOURCE=2
+	CONFIG(debug, debug|release) {
+		QMAKE_CFLAGS *= -fstack-protector -fPIE
+		QMAKE_CXXFLAGS *= -fstack-protector -fPIE
+		QMAKE_LFLAGS *= -pie
+		QMAKE_LFLAGS *= -Wl,--no-add-needed
+	}
+
+	QMAKE_CFLAGS *= -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
+	QMAKE_CXXFLAGS *= -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
 	QMAKE_LFLAGS *= -Wl,-z,relro -Wl,-z,now
 
 	CONFIG(symbols) {
@@ -229,11 +268,11 @@ macx {
 		QMAKE_CC = $$system(xcrun -find clang)
 		QMAKE_CXX = $$system(xcrun -find clang++)
 		QMAKE_LINK = $$system(xcrun -find clang++)
-		QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
-		QMAKE_CFLAGS += -mmacosx-version-min=10.6
-		QMAKE_CXXFLAGS += -mmacosx-version-min=10.6
-		QMAKE_OBJECTIVE_CFLAGS += -mmacosx-version-min=10.6
-		QMAKE_OBJECTIVE_CXXFLAGS += -mmacosx-version-min=10.6
+		QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+		QMAKE_CFLAGS += -mmacosx-version-min=10.7
+		QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
+		QMAKE_OBJECTIVE_CFLAGS += -mmacosx-version-min=10.7
+		QMAKE_OBJECTIVE_CXXFLAGS += -mmacosx-version-min=10.7
 	} else {
 		XCODE_PATH=$$system(xcode-select -print-path)
 		CONFIG += x86 ppc no-cocoa
@@ -254,6 +293,8 @@ macx {
 	CONFIG(symbols) {
 		QMAKE_CFLAGS *= -gfull -gdwarf-2
 		QMAKE_CXXFLAGS *= -gfull -gdwarf-2
+		QMAKE_OBJECTIVE_CFLAGS *= -gfull -gdwarf-2
+		QMAKE_OBJECTIVE_CXXFLAGS *= -gfull -gdwarf-2
 	}
 }
 
