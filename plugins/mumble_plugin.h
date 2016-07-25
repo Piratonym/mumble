@@ -1,32 +1,7 @@
-/* Copyright (C) 2005-2012, Thorvald Natvig <thorvald@natvig.com>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #ifndef MUMBLE_MUMBLE_PLUGIN_H_
 #define MUMBLE_MUMBLE_PLUGIN_H_
@@ -35,27 +10,32 @@
 #include <map>
 
 // Visual Studio 2008 x86
-#if _MSC_VER == 1500 && defined(_M_X86)
+#if _MSC_VER == 1500 && defined(_M_IX86)
 # define MUMBLE_PLUGIN_MAGIC     0xd63ab7ef
 # define MUMBLE_PLUGIN_MAGIC_2   0xd63ab7fe
+# define MUMBLE_PLUGIN_MAGIC_QT  0xd63ab7ee
 // Visual Studio 2010 x86
-#elif _MSC_VER == 1600 && defined(_M_X86)
+#elif _MSC_VER == 1600 && defined(_M_IX86)
 # define MUMBLE_PLUGIN_MAGIC    0xd63ab7f0
 # define MUMBLE_PLUGIN_MAGIC_2  0xd63ab7ff
+# define MMUBLE_PLUGIN_MAGIC_QT 0xd63ab70f
 // Visual Studio 2013 x86
-#elif _MSC_VER == 1800 && defined(_M_X86)
+#elif _MSC_VER == 1800 && defined(_M_IX86)
 # define MUMBLE_PLUGIN_MAGIC    0xd63ab7c0
 # define MUMBLE_PLUGIN_MAGIC_2  0xd63ab7cf
+# define MUMBLE_PLUGIN_MAGIC_QT 0xd63ab7ca
 // Visual Studio 2013 x64
 #elif _MSC_VER == 1800 && defined(_M_X64)
 # define MUMBLE_PLUGIN_MAGIC    0x9f3ed4c0
 # define MUMBLE_PLUGIN_MAGIC_2  0x9f3ed4cf
+# define MUMBLE_PLUGIN_MAGIC_QT 0x9f3ed4ca
 // Generic plugin magic values for platforms
 // where we do not officially plugins other
 // than "link".
 #else
 # define MUMBLE_PLUGIN_MAGIC    0xf4573570
 # define MUMBLE_PLUGIN_MAGIC_2  0xf457357f
+# define MUMBLE_PLUGIN_MAGIC_QT 0xf457357a
 #endif
 
 #define MUMBLE_PLUGIN_VERSION 2
@@ -78,8 +58,40 @@ typedef struct _MumblePlugin2 {
 	int (__cdecl *trylock)(const std::multimap<std::wstring, unsigned long long int> &);
 } MumblePlugin2;
 
+/// MumblePluginQt provides an extra set of functions that will
+/// provide a plugin with a pointer to a QWidget that should be
+/// used as the parent for any dialogs Qt widgets shown by the
+/// plugin.
+///
+/// This interface should only be used if a plugin intends to
+/// present Qt-based dialogs to the user.
+///
+/// This interface is most useful for plugins that are internal
+/// to Mumble. This is because plugins can't integrate with Mumble's
+/// QWidgets unless they're built into Mumble itself.
+typedef struct _MumblePluginQt {
+	unsigned int magic;
+
+	/// about is called when Mumble requests the plugin
+	/// to show an about dialog.
+	///
+	/// The ptr argument is a pointer to a QWidget that
+	/// should be used as the parent for a Qt-based
+	/// about dialog.
+	void (__cdecl *about)(void *ptr);
+
+	/// config is called when Mumble requests the plugin
+	/// to show its configuration dialog.
+	///
+	/// The ptr argument is a pointer to a QWidget that
+	/// should be used as the parent for a Qt-based
+	/// configuration dialog.
+	void (__cdecl *config)(void *ptr);
+} MumblePluginQt;
+
 typedef MumblePlugin *(__cdecl *mumblePluginFunc)();
 typedef MumblePlugin2 *(__cdecl *mumblePlugin2Func)();
+typedef MumblePluginQt *(__cdecl *mumblePluginQtFunc)();
 
 /*
  * All plugins must implement one function called mumbleGetPlugin(), which

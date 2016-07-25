@@ -1,6 +1,12 @@
+# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Use of this source code is governed by a BSD-style license
+# that can be found in the LICENSE file at the root of the
+# Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
 include(../compiler.pri)
 include(../qt.pri)
 include(../rcc.pri)
+include(../pkgconfig.pri)
 
 VERSION		= 1.3.0
 DIST		= mumble.pri Message.h PacketDataStream.h CryptState.h Timer.h Version.h OSInfo.h SSL.h
@@ -8,8 +14,8 @@ CONFIG		+= qt thread debug_and_release warn_on
 DEFINES		*= MUMBLE_VERSION_STRING=$$VERSION
 INCLUDEPATH	+= $$PWD . ../mumble_proto
 VPATH		+= $$PWD
-HEADERS		*= ACL.h Channel.h CryptState.h Connection.h Group.h User.h Net.h OSInfo.h Timer.h SSL.h Version.h SSLCipherInfo.h SSLCipherInfoTable.h
-SOURCES 	*= ACL.cpp Group.cpp Channel.cpp Connection.cpp User.cpp Timer.cpp CryptState.cpp OSInfo.cpp Net.cpp SSL.cpp Version.cpp SSLCipherInfo.cpp
+HEADERS		*= ACL.h Channel.h CryptState.h Connection.h Group.h HTMLFilter.h User.h Net.h OSInfo.h Timer.h SSL.h Version.h SSLCipherInfo.h SSLCipherInfoTable.h
+SOURCES 	*= ACL.cpp Group.cpp Channel.cpp Connection.cpp HTMLFilter.cpp User.cpp Timer.cpp CryptState.cpp OSInfo.cpp Net.cpp SSL.cpp Version.cpp SSLCipherInfo.cpp
 LIBS		*= -lmumble_proto
 # Note: Protobuf generates into its own directory so we can mark it as a
 #       system include folder for unix. Otherwise the generated code creates
@@ -37,8 +43,6 @@ win32 {
 }
 
 unix {
-	UNAME=$$system(uname -s)
-
 	CONFIG(static) {
 		PKG_CONFIG = pkg-config --static
 	}
@@ -47,12 +51,13 @@ unix {
 	QMAKE_CXXFLAGS *= "-isystem ../mumble_proto"
 
 	CONFIG *= link_pkgconfig
-	LIBS *= -lprotobuf
 
-	freebsd {
+	must_pkgconfig(protobuf)
+
+	contains(UNAME, FreeBSD) {
 		LIBS *= -lcrypto -lssl
 	} else {
-		PKGCONFIG *= openssl
+		must_pkgconfig(openssl)
 	}
 }
 

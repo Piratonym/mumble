@@ -4,109 +4,109 @@
     <message>
         <location filename="ACLEditor.cpp" line="+127"/>
         <source>Deny</source>
-        <translation type="unfinished"/>
+        <translation>Забрани</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Allow</source>
-        <translation type="unfinished"/>
+        <translation>Позволи</translation>
     </message>
     <message>
         <location line="+21"/>
         <source>Allow %1</source>
-        <translation type="unfinished"/>
+        <translation>Позволи %1</translation>
     </message>
     <message>
         <location line="-8"/>
         <source>Deny %1</source>
-        <translation type="unfinished"/>
+        <translation>Забрани %1</translation>
     </message>
     <message>
         <location line="-84"/>
         <source>Mumble - Add channel</source>
-        <translation type="unfinished"/>
+        <translation>Мъмбъл - Добавяне на канал</translation>
     </message>
     <message>
         <location line="+11"/>
         <location line="+50"/>
         <source>Default server value</source>
-        <translation type="unfinished"/>
+        <translation>Първоначални стойности на сървъра</translation>
     </message>
     <message>
         <location line="-28"/>
         <location line="+176"/>
         <source>Failed: Invalid channel</source>
-        <translation type="unfinished"/>
+        <translation>Неуспех: Невалиден канал</translation>
     </message>
     <message>
         <location line="-164"/>
         <source>Mumble - Edit %1</source>
-        <translation type="unfinished"/>
+        <translation>Мъмбъл - Редактирай %1</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>ID: %1</source>
-        <translation type="unfinished"/>
+        <translation>ID: %1</translation>
     </message>
     <message>
         <location line="+46"/>
         <source>This grants the %1 privilege. If a privilege is both allowed and denied, it is denied.&lt;br /&gt;%2</source>
-        <translation type="unfinished"/>
+        <translation>Това дава привилегия на %1. Ако привилегия е едновременно позволена и забранена, то тя е забранена. &lt;br /&gt;%2</translation>
     </message>
     <message>
         <location line="+123"/>
         <source>Channel must have a name</source>
-        <translation type="unfinished"/>
+        <translation>Каналът трябва да има име</translation>
     </message>
     <message>
         <location line="-131"/>
         <source>This revokes the %1 privilege. If a privilege is both allowed and denied, it is denied.&lt;br /&gt;%2</source>
-        <translation type="unfinished"/>
+        <translation>Това отхвърля привилегията на %1. Ако привилегия е едновременно позволена и забранена, то тя е забранена. &lt;br /&gt;%2</translation>
     </message>
     <message>
         <location filename="ACLEditor.ui"/>
         <source>Dialog</source>
-        <translation type="unfinished"/>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location/>
         <source>Enter the channel name here.</source>
-        <translation type="unfinished"/>
+        <translation>Въведете името на канала тук.</translation>
     </message>
     <message>
         <location/>
         <source>Description</source>
-        <translation type="unfinished"/>
+        <translation>Описание</translation>
     </message>
     <message>
         <location/>
         <source>Password</source>
-        <translation type="unfinished"/>
+        <translation>Парола</translation>
     </message>
     <message>
         <location/>
         <source>Enter the channel password here.</source>
-        <translation type="unfinished"/>
+        <translation>Въведете паролата на канала тук.</translation>
     </message>
     <message>
         <location/>
         <source>Check to create a temporary channel.</source>
-        <translation type="unfinished"/>
+        <translation>Отметнете за създаване на временен канал.</translation>
     </message>
     <message>
         <location/>
         <source>Temporary</source>
-        <translation type="unfinished"/>
+        <translation>Временен</translation>
     </message>
     <message>
         <location/>
         <source>Channel positioning facility value</source>
-        <translation type="unfinished"/>
+        <translation>Сгойност за подреждане на канали</translation>
     </message>
     <message>
         <location/>
@@ -114,87 +114,88 @@
 This value enables you to change the way Mumble arranges the channels in the tree. A channel with a higher &lt;i&gt;Position&lt;/i&gt; value will always be placed below one with a lower value and the other way around. If the &lt;i&gt;Position&lt;/i&gt; value of two channels is equal they will get sorted alphabetically by their name.</source>
         <oldsource>&lt;b&gt;Position&lt;/b&gt;&lt;br/&gt;
 This value enables you to change the way mumble arranges the channels in the tree. A channel with a higher &lt;i&gt;Position&lt;/i&gt; value will always be placed below one with a lower value and the other way around. If the &lt;i&gt;Position&lt;/i&gt; value of two channels is equal they will get sorted alphabetically by their name.</oldsource>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Пози;ия&lt;/b&gt;&lt;br/&gt;
+Тази стойност позволява да промените начина, по който Мъмбъл подрежда каналите в списъка. Канал с по-висока стойност &lt;i&gt;Позиция&lt;/i&gt; ще бъде винаги поставен под канал с по-ниска стойност и обратно. Ако стойността &lt;i&gt;Позиция&lt;/i&gt; на два канала е еднаква, те ще бъдат подредени по азбучен ред.</translation>
     </message>
     <message>
         <location/>
         <source>Position</source>
-        <translation type="unfinished"/>
+        <translation>Позиция</translation>
     </message>
     <message>
         <location/>
         <source>&amp;Groups</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Групи</translation>
     </message>
     <message>
         <location/>
         <source>Group</source>
-        <translation type="unfinished"/>
+        <translation>Групи</translation>
     </message>
     <message>
         <location/>
         <source>List of groups</source>
-        <translation type="unfinished"/>
+        <translation>Списък с групи</translation>
     </message>
     <message>
         <location/>
         <source>Remove selected group</source>
-        <translation type="unfinished"/>
+        <translation>Премахване на избраната група</translation>
     </message>
     <message>
         <location/>
         <source>Remove</source>
-        <translation type="unfinished"/>
+        <translation>Премахване</translation>
     </message>
     <message>
         <location/>
         <source>Inherit group members from parent</source>
-        <translation type="unfinished"/>
+        <translation>Наследяване на членовете на групата от родителя</translation>
     </message>
     <message>
         <location/>
         <source>Inherit</source>
-        <translation type="unfinished"/>
+        <translation>Наследяване</translation>
     </message>
     <message>
         <location/>
         <source>Make group inheritable to sub-channels</source>
-        <translation type="unfinished"/>
+        <translation>Правене на групата наследима за подканали</translation>
     </message>
     <message>
         <location/>
         <source>Inheritable</source>
-        <translation type="unfinished"/>
+        <translation>Наследима</translation>
     </message>
     <message>
         <location/>
         <source>Group was inherited from parent channel</source>
-        <translation type="unfinished"/>
+        <translation>Групата беше наследена от родителски канал</translation>
     </message>
     <message>
         <location/>
         <source>Inherited</source>
-        <translation type="unfinished"/>
+        <translation>Наследена</translation>
     </message>
     <message>
         <location/>
         <source>Members</source>
-        <translation type="unfinished"/>
+        <translation>Членове</translation>
     </message>
     <message>
         <location/>
         <source>Add</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне</translation>
     </message>
     <message>
         <location/>
         <source>Add member to group</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне на член в групата</translation>
     </message>
     <message>
         <location/>
         <source>Remove member from group</source>
-        <translation type="unfinished"/>
+        <translation>Премахване на член от групата</translation>
     </message>
     <message>
         <location/>
@@ -269,7 +270,7 @@ This value enables you to change the way mumble arranges the channels in the tre
     <message>
         <location/>
         <source>&amp;Add</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Добавяне</translation>
     </message>
     <message>
         <location/>
@@ -284,7 +285,7 @@ This value enables you to change the way mumble arranges the channels in the tre
     <message>
         <location/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Премахване</translation>
     </message>
     <message>
         <location/>
@@ -315,7 +316,7 @@ This value enables you to change the way mumble arranges the channels in the tre
     <message>
         <location/>
         <source>Add new group</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне на нова група</translation>
     </message>
     <message>
         <location/>
@@ -376,7 +377,7 @@ Add a new group.</source>
     <message>
         <location/>
         <source>Permissions</source>
-        <translation type="unfinished"/>
+        <translation>Позволения</translation>
     </message>
     <message>
         <location/>
@@ -559,17 +560,17 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="ASIOInput.ui"/>
         <source>Form</source>
-        <translation type="unfinished"/>
+        <translation>Форма</translation>
     </message>
     <message>
         <location/>
         <source>Device selection</source>
-        <translation type="unfinished"/>
+        <translation>Избор на устройство</translation>
     </message>
     <message>
         <location/>
         <source>Device</source>
-        <translation type="unfinished"/>
+        <translation>Устройство</translation>
     </message>
     <message>
         <location/>
@@ -639,32 +640,32 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Channels</source>
-        <translation type="unfinished"/>
+        <translation>Канали</translation>
     </message>
     <message>
         <location/>
         <source>Microphone</source>
-        <translation type="unfinished"/>
+        <translation>Микрофон</translation>
     </message>
     <message>
         <location/>
         <source>&lt;-</source>
-        <translation type="unfinished"/>
+        <translation>&lt;-</translation>
     </message>
     <message>
         <location/>
         <source>-&gt;</source>
-        <translation type="unfinished"/>
+        <translation>-&gt;</translation>
     </message>
     <message>
         <location/>
         <source>Unused</source>
-        <translation type="unfinished"/>
+        <translation>Неизползвано</translation>
     </message>
     <message>
         <location/>
         <source>Speakers</source>
-        <translation type="unfinished"/>
+        <translation>Колонки</translation>
     </message>
 </context>
 <context>
@@ -685,32 +686,32 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="About.cpp" line="+40"/>
         <source>About Mumble</source>
-        <translation type="unfinished"/>
+        <translation>За Мъмбъл</translation>
     </message>
     <message>
         <location line="+30"/>
-        <source>&lt;h3&gt;Mumble (%1)&lt;/h3&gt;&lt;p&gt;Copyright %3 The Mumble team&lt;/p&gt;&lt;p&gt;&lt;b&gt;A voice-chat utility for gamers&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/tt&gt;&lt;/p&gt;</source>
+        <source>&lt;h3&gt;Mumble (%1)&lt;/h3&gt;&lt;p&gt;%3&lt;/p&gt;&lt;p&gt;&lt;b&gt;A voice-chat utility for gamers&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/tt&gt;&lt;/p&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+12"/>
         <source>&amp;About Mumble</source>
-        <translation type="unfinished"/>
+        <translation>&amp;За Мъмбъл</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>&amp;License</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Разрешително</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>3rd &amp;party licenses</source>
-        <translation type="unfinished"/>
+        <translation>Разрешителни от &amp;трети страни</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>OK</source>
-        <translation type="unfinished"/>
+        <translation>Добре</translation>
     </message>
 </context>
 <context>
@@ -718,22 +719,22 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="AudioInput.ui"/>
         <source>Form</source>
-        <translation type="unfinished"/>
+        <translation>Форма</translation>
     </message>
     <message>
         <location/>
         <source>Interface</source>
-        <translation type="unfinished"/>
+        <translation>Интерфейс</translation>
     </message>
     <message>
         <location/>
         <source>System</source>
-        <translation type="unfinished"/>
+        <translation>Система</translation>
     </message>
     <message>
         <location/>
         <source>Input method for audio</source>
-        <translation type="unfinished"/>
+        <translation>Входен метод за звук</translation>
     </message>
     <message>
         <location/>
@@ -743,12 +744,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Device</source>
-        <translation type="unfinished"/>
+        <translation>Устройство</translation>
     </message>
     <message>
         <location/>
         <source>Input device for audio</source>
-        <translation type="unfinished"/>
+        <translation>Входно устройство за звук</translation>
     </message>
     <message>
         <location/>
@@ -758,12 +759,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Transmission</source>
-        <translation type="unfinished"/>
+        <translation>Предаване</translation>
     </message>
     <message>
         <location/>
         <source>&amp;Transmit</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Предаване</translation>
     </message>
     <message>
         <location/>
@@ -813,12 +814,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Off</source>
-        <translation type="unfinished"/>
+        <translation>Изключено</translation>
     </message>
     <message>
         <location/>
         <source>On</source>
-        <translation type="unfinished"/>
+        <translation>Включено</translation>
     </message>
     <message>
         <location/>
@@ -883,7 +884,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>&amp;Quality</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Качество</translation>
     </message>
     <message>
         <location/>
@@ -963,21 +964,6 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Disabled</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location/>
-        <source>Mixed</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location/>
-        <source>Multichannel</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location/>
-        <source>Echo</source>
         <translation type="unfinished"/>
     </message>
     <message>
@@ -1101,7 +1087,7 @@ This value allows you to set the maximum number of users allowed in the channel.
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="AudioInput.cpp" line="+529"/>
+        <location filename="AudioInput.cpp" line="+531"/>
         <source>Server maximum network bandwidth is only %1 kbit/s. Audio quality auto-adjusted to %2 kbit/s (%3 ms)</source>
         <translation type="unfinished"/>
     </message>
@@ -1140,57 +1126,72 @@ This value allows you to set the maximum number of users allowed in the channel.
         <source>after</source>
         <translation type="unfinished"/>
     </message>
+    <message>
+        <location/>
+        <source>Echo Cancellation</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location/>
+        <source>Mixed echo cancellation</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location/>
+        <source>Multichannel echo cancellation</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>AudioInputDialog</name>
     <message>
         <location filename="AudioConfigDialog.cpp" line="+75"/>
         <source>Continuous</source>
-        <translation type="unfinished"/>
+        <translation>Постоянно</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Voice Activity</source>
-        <translation type="unfinished"/>
+        <translation>Гласова активност</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Push To Talk</source>
-        <translation type="unfinished"/>
+        <translation>Натискане за говорене</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>Audio Input</source>
-        <translation type="unfinished"/>
+        <translation>Звуков вход</translation>
     </message>
     <message>
         <location line="+111"/>
         <location line="+8"/>
         <location line="+7"/>
         <source>%1 ms</source>
-        <translation type="unfinished"/>
+        <translation>%1 мс</translation>
     </message>
     <message>
         <location line="-9"/>
         <location line="+7"/>
         <location line="+20"/>
         <source>Off</source>
-        <translation type="unfinished"/>
+        <translation>Изключено</translation>
     </message>
     <message>
         <location line="-12"/>
         <source>%1 s</source>
-        <translation type="unfinished"/>
+        <translation>%1 с</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>%1 kb/s</source>
-        <translation type="unfinished"/>
+        <translation>%1 кб/с</translation>
     </message>
     <message>
         <location line="+11"/>
         <source>-%1 dB</source>
-        <translation type="unfinished"/>
+        <translation>-%1 дБ</translation>
     </message>
     <message>
         <location line="+48"/>
@@ -1203,22 +1204,22 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="AudioOutput.ui"/>
         <source>Form</source>
-        <translation type="unfinished"/>
+        <translation>Форма</translation>
     </message>
     <message>
         <location/>
         <source>Interface</source>
-        <translation type="unfinished"/>
+        <translation>Интерфейс</translation>
     </message>
     <message>
         <location/>
         <source>System</source>
-        <translation type="unfinished"/>
+        <translation>Система</translation>
     </message>
     <message>
         <location/>
         <source>Output method for audio</source>
-        <translation type="unfinished"/>
+        <translation>Изходен метод за звук</translation>
     </message>
     <message>
         <location/>
@@ -1229,12 +1230,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Device</source>
-        <translation type="unfinished"/>
+        <translation>Устройство</translation>
     </message>
     <message>
         <location/>
         <source>Output device for audio</source>
-        <translation type="unfinished"/>
+        <translation>Изходно устройство за звук</translation>
     </message>
     <message>
         <location/>
@@ -1249,7 +1250,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Audio Output</source>
-        <translation type="unfinished"/>
+        <translation>Звуков изход</translation>
     </message>
     <message>
         <location/>
@@ -1289,12 +1290,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Volume</source>
-        <translation type="unfinished"/>
+        <translation>Гръмкост</translation>
     </message>
     <message>
         <location/>
         <source>Volume of incoming speech</source>
-        <translation type="unfinished"/>
+        <translation>Гръмкост на входящата реч</translation>
     </message>
     <message>
         <location/>
@@ -1350,17 +1351,17 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Headphones</source>
-        <translation type="unfinished"/>
+        <translation>Слушалки</translation>
     </message>
     <message>
         <location/>
         <source>Minimum Distance</source>
-        <translation type="unfinished"/>
+        <translation>Минимално разстояние</translation>
     </message>
     <message>
         <location/>
         <source>Maximum Distance</source>
-        <translation type="unfinished"/>
+        <translation>Максимално разстояние</translation>
     </message>
     <message>
         <location/>
@@ -1370,7 +1371,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Minimum Volume</source>
-        <translation type="unfinished"/>
+        <translation>Минимална гръмкост</translation>
     </message>
     <message>
         <location/>
@@ -1401,7 +1402,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Packet Loss</source>
-        <translation type="unfinished"/>
+        <translation>Загуба на пакети</translation>
     </message>
     <message>
         <location/>
@@ -1559,14 +1560,14 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location line="+6"/>
         <source>Audio Output</source>
-        <translation type="unfinished"/>
+        <translation>Звуков изход</translation>
     </message>
     <message>
         <location line="+123"/>
         <location line="+19"/>
         <location line="+8"/>
         <source>%1 ms</source>
-        <translation type="unfinished"/>
+        <translation>%1 мс</translation>
     </message>
     <message>
         <location line="-16"/>
@@ -1575,13 +1576,13 @@ This value allows you to set the maximum number of users allowed in the channel.
         <location line="+31"/>
         <location line="+4"/>
         <source>%1 %</source>
-        <translation type="unfinished"/>
+        <translation>%1 %</translation>
     </message>
     <message>
         <location line="-16"/>
         <location line="+6"/>
         <source>%1 m</source>
-        <translation type="unfinished"/>
+        <translation>%1 м</translation>
     </message>
 </context>
 <context>
@@ -1589,12 +1590,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="AudioOutputSample.cpp" line="+211"/>
         <source>Choose sound file</source>
-        <translation type="unfinished"/>
+        <translation>Изберете звуков файл</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Invalid sound file</source>
-        <translation type="unfinished"/>
+        <translation>Недействителен звуков файл</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -1608,7 +1609,7 @@ This value allows you to set the maximum number of users allowed in the channel.
         <location filename="AudioStats.cpp" line="+388"/>
         <source>&gt;1000 ms</source>
         <oldsource>&gt;1000ms</oldsource>
-        <translation type="unfinished"/>
+        <translation>&gt;1000 мс</translation>
     </message>
     <message>
         <location filename="AudioStats.ui"/>
@@ -1787,32 +1788,32 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location filename="AudioWizard.ui"/>
         <source>Audio Tuning Wizard</source>
-        <translation type="unfinished"/>
+        <translation>Помощник за настройка на звука</translation>
     </message>
     <message>
         <location/>
         <source>Introduction</source>
-        <translation type="unfinished"/>
+        <translation>Въведение</translation>
     </message>
     <message>
         <location/>
         <source>Welcome to the Mumble Audio Wizard</source>
-        <translation type="unfinished"/>
+        <translation>Добре дошли в звуковия помощник на Мъмбъл</translation>
     </message>
     <message>
         <location/>
         <source>Finished</source>
-        <translation type="unfinished"/>
+        <translation>Завършено</translation>
     </message>
     <message>
         <location/>
         <source>Enjoy using Mumble</source>
-        <translation type="unfinished"/>
+        <translation>Насладете се на използването на Мъмбъл</translation>
     </message>
     <message>
         <location/>
         <source>Device selection</source>
-        <translation type="unfinished"/>
+        <translation>Избор на устройство</translation>
     </message>
     <message>
         <location/>
@@ -1827,12 +1828,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>System</source>
-        <translation type="unfinished"/>
+        <translation>Система</translation>
     </message>
     <message>
         <location/>
         <source>Input method for audio</source>
-        <translation type="unfinished"/>
+        <translation>Входен метод за звук</translation>
     </message>
     <message>
         <location/>
@@ -1842,12 +1843,12 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Device</source>
-        <translation type="unfinished"/>
+        <translation>Устройство</translation>
     </message>
     <message>
         <location/>
         <source>Input device to use</source>
-        <translation type="unfinished"/>
+        <translation>Входно устройство за използване</translation>
     </message>
     <message>
         <location/>
@@ -1877,7 +1878,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Output method for audio</source>
-        <translation type="unfinished"/>
+        <translation>Изходен метод за звук</translation>
     </message>
     <message>
         <location/>
@@ -1887,7 +1888,7 @@ This value allows you to set the maximum number of users allowed in the channel.
     <message>
         <location/>
         <source>Output device to use</source>
-        <translation type="unfinished"/>
+        <translation>Изходно устройство за използване</translation>
     </message>
     <message>
         <location/>
@@ -1918,12 +1919,12 @@ Please be aware that as long as this wizard is active, audio will be looped loca
     <message>
         <location/>
         <source>Input Device</source>
-        <translation type="unfinished"/>
+        <translation>Входно устройство</translation>
     </message>
     <message>
         <location/>
         <source>Output Device</source>
-        <translation type="unfinished"/>
+        <translation>Изходно устройство</translation>
     </message>
     <message>
         <location/>
@@ -2078,7 +2079,7 @@ Mumble is under continuous development, and the development team wants to focus 
     <message>
         <location/>
         <source>Quality &amp; Notifications</source>
-        <translation type="unfinished"/>
+        <translation>Качество и известия</translation>
     </message>
     <message>
         <location/>
@@ -2088,7 +2089,7 @@ Mumble is under continuous development, and the development team wants to focus 
     <message>
         <location/>
         <source>Quality settings</source>
-        <translation type="unfinished"/>
+        <translation>Настройки на качеството</translation>
     </message>
     <message>
         <location/>
@@ -2103,7 +2104,7 @@ Mumble is under continuous development, and the development team wants to focus 
     <message>
         <location/>
         <source>Notification settings</source>
-        <translation type="unfinished"/>
+        <translation>Настройки на известията</translation>
     </message>
     <message>
         <location/>
@@ -2118,7 +2119,7 @@ Mumble is under continuous development, and the development team wants to focus 
     <message>
         <location filename="AudioWizard.cpp" line="+316"/>
         <source>%1 ms</source>
-        <translation type="unfinished"/>
+        <translation>%1 мс</translation>
     </message>
     <message>
         <location filename="AudioWizard.ui"/>
@@ -2257,7 +2258,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>&amp;Add</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Добавяне</translation>
     </message>
     <message>
         <location/>
@@ -2267,7 +2268,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Премахване</translation>
     </message>
     <message>
         <location/>
@@ -2362,7 +2363,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Clear all fields</source>
-        <translation type="unfinished"/>
+        <translation>Изчистване на всички полета</translation>
     </message>
     <message>
         <location/>
@@ -2372,7 +2373,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Clear</source>
-        <translation type="unfinished"/>
+        <translation>Изчистване</translation>
     </message>
     <message numerus="yes">
         <location filename="BanEditor.cpp" line="+202"/>
@@ -2385,12 +2386,12 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location filename="Cert.cpp" line="+51"/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location line="+8"/>
         <source>Email</source>
-        <translation type="unfinished"/>
+        <translation>Е-поща</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -2476,7 +2477,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="main.cpp" line="+474"/>
+        <location filename="main.cpp" line="+494"/>
         <source>&lt;b&gt;Certificate Expiry:&lt;/b&gt; Your certificate is about to expire. You need to renew it, or you will no longer be able to connect to servers you are registered on.</source>
         <translation type="unfinished"/>
     </message>
@@ -2486,12 +2487,12 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location filename="Cert.ui"/>
         <source>Certificate Management</source>
-        <translation type="unfinished"/>
+        <translation>Управление на удостоверения</translation>
     </message>
     <message>
         <location/>
         <source>Certificate Authentication</source>
-        <translation type="unfinished"/>
+        <translation>Проверка на удостоверения</translation>
     </message>
     <message>
         <location/>
@@ -2501,7 +2502,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Current certificate</source>
-        <translation type="unfinished"/>
+        <translation>Текущо удостоверение</translation>
     </message>
     <message>
         <location/>
@@ -2511,52 +2512,52 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Current Certificate</source>
-        <translation type="unfinished"/>
+        <translation>Текущо удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>Create a new certificate</source>
-        <translation type="unfinished"/>
+        <translation>Създаване на ново удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>This will create a new certificate.</source>
-        <translation type="unfinished"/>
+        <translation>Това ще създаде ново удостоверение.</translation>
     </message>
     <message>
         <location/>
         <source>Import certificate from file</source>
-        <translation type="unfinished"/>
+        <translation>Внасяне на удостоверение от файл</translation>
     </message>
     <message>
         <location/>
         <source>This will import a certificate from file.</source>
-        <translation type="unfinished"/>
+        <translation>Това ще внесе удостоверение от файл.</translation>
     </message>
     <message>
         <location/>
         <source>Import a certificate</source>
-        <translation type="unfinished"/>
+        <translation>Внасяне на удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>Export Certificate</source>
-        <translation type="unfinished"/>
+        <translation>Изнасяне на удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>This will export a certificate to file.</source>
-        <translation type="unfinished"/>
+        <translation>Това ще изнесе удостоверение във файл.</translation>
     </message>
     <message>
         <location/>
         <source>Export current certificate</source>
-        <translation type="unfinished"/>
+        <translation>Изнасяне на текущото удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>Import Certificate</source>
-        <translation type="unfinished"/>
+        <translation>Внасяне на удостоверение</translation>
     </message>
     <message>
         <location/>
@@ -2572,7 +2573,7 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Import from</source>
-        <translation type="unfinished"/>
+        <translation>Внасяне от</translation>
     </message>
     <message>
         <location/>
@@ -2597,12 +2598,12 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Open...</source>
-        <translation type="unfinished"/>
+        <translation>Отваряне...</translation>
     </message>
     <message>
         <location/>
         <source>Password</source>
-        <translation type="unfinished"/>
+        <translation>Парола</translation>
     </message>
     <message>
         <location/>
@@ -2617,27 +2618,27 @@ Speak loudly, as when you are annoyed or excited. Decrease the volume in the sou
     <message>
         <location/>
         <source>Certificate to import</source>
-        <translation type="unfinished"/>
+        <translation>Удостоверение за внасяне</translation>
     </message>
     <message>
         <location/>
         <source>This is the certificate you are importing.</source>
-        <translation type="unfinished"/>
+        <translation>Това е удостоверението, което внасяте.</translation>
     </message>
     <message>
         <location/>
         <source>Certificate Details</source>
-        <translation type="unfinished"/>
+        <translation>Подробности за удостоверението</translation>
     </message>
     <message>
         <location/>
         <source>Replace Certificate</source>
-        <translation type="unfinished"/>
+        <translation>Заменяне на удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>Replace existing certificate with new certificate?</source>
-        <translation type="unfinished"/>
+        <translation>Заменяне на съществуващото удостоверение с ново?</translation>
     </message>
     <message>
         <location/>
@@ -2660,27 +2661,27 @@ Are you sure you wish to replace your certificate?
     <message>
         <location/>
         <source>New certificate</source>
-        <translation type="unfinished"/>
+        <translation>Ново удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>This is the new certificate that will replace the old one.</source>
-        <translation type="unfinished"/>
+        <translation>Това е новото удостоверение, което ще замени старото.</translation>
     </message>
     <message>
         <location/>
         <source>New Certificate</source>
-        <translation type="unfinished"/>
+        <translation>Ново удостоверение</translation>
     </message>
     <message>
         <location/>
         <source>Make a backup of your certificate</source>
-        <translation type="unfinished"/>
+        <translation>Направете резервно копие на удостоверението ви</translation>
     </message>
     <message>
         <location/>
         <source>Export to</source>
-        <translation type="unfinished"/>
+        <translation>Изнасяне към</translation>
     </message>
     <message>
         <location/>
@@ -2695,7 +2696,7 @@ Are you sure you wish to replace your certificate?
     <message>
         <location/>
         <source>Save As...</source>
-        <translation type="unfinished"/>
+        <translation>Запазване като...</translation>
     </message>
     <message>
         <location/>
@@ -2715,12 +2716,12 @@ Are you sure you wish to replace your certificate?
     <message>
         <location/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location/>
         <source>Email</source>
-        <translation type="unfinished"/>
+        <translation>Е-поща</translation>
     </message>
     <message>
         <location/>
@@ -2903,37 +2904,37 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
     <message>
         <location line="+31"/>
         <source>Whisper</source>
-        <translation type="unfinished"/>
+        <translation>Шепнене</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Move</source>
-        <translation type="unfinished"/>
+        <translation>Преместване</translation>
     </message>
     <message>
         <location line="+8"/>
         <source>Text message</source>
-        <translation type="unfinished"/>
+        <translation>Текстово съобщение</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Kick</source>
-        <translation type="unfinished"/>
+        <translation>Изритване</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Ban</source>
-        <translation type="unfinished"/>
+        <translation>Забраняване</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Register User</source>
-        <translation type="unfinished"/>
+        <translation>Регистриране на потребител</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Register Self</source>
-        <translation type="unfinished"/>
+        <translation>Регистриране на себе си</translation>
     </message>
     <message>
         <location line="-28"/>
@@ -3069,24 +3070,24 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
     <message>
         <location/>
         <source>Advanced</source>
-        <translation type="unfinished"/>
+        <translation>Разширени</translation>
     </message>
 </context>
 <context>
     <name>ConnectDialog</name>
     <message>
-        <location filename="ConnectDialog.cpp" line="+996"/>
+        <location filename="ConnectDialog.cpp" line="+1022"/>
         <source>Connecting to %1</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-591"/>
-        <location line="+591"/>
+        <location line="-617"/>
+        <location line="+617"/>
         <source>Enter username</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-591"/>
+        <location line="-617"/>
         <source>Adding host %1</source>
         <translation type="unfinished"/>
     </message>
@@ -3109,22 +3110,22 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
     <message>
         <location line="+3"/>
         <source>Port</source>
-        <translation type="unfinished"/>
+        <translation>Порт</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Addresses</source>
-        <translation type="unfinished"/>
+        <translation>Адреси</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Website</source>
-        <translation type="unfinished"/>
+        <translation>Сайт</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Packet loss</source>
-        <translation type="unfinished"/>
+        <translation>Загуба на пакети</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -3135,7 +3136,7 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
         <location line="+0"/>
         <location line="+2"/>
         <source>%1 ms</source>
-        <translation type="unfinished"/>
+        <translation>%1 мс</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -3150,31 +3151,31 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
     <message>
         <location line="+0"/>
         <source>%1 kbit/s</source>
-        <translation type="unfinished"/>
+        <translation>%1 кбит/с</translation>
     </message>
     <message>
-        <location line="+345"/>
+        <location line="+350"/>
         <source>&amp;Connect</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Свързване</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+74"/>
         <source>&amp;Filters</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="ConnectDialog.ui"/>
-        <location filename="ConnectDialog.cpp" line="-401"/>
+        <location filename="ConnectDialog.cpp" line="-423"/>
         <source>Users</source>
-        <translation type="unfinished"/>
+        <translation>Потребители</translation>
     </message>
     <message>
         <location filename="ConnectDialog.cpp" line="+1"/>
         <source>Version</source>
-        <translation type="unfinished"/>
+        <translation>Версия</translation>
     </message>
     <message>
-        <location line="+1099"/>
+        <location line="+1143"/>
         <source>Failed to fetch server list</source>
         <translation type="unfinished"/>
     </message>
@@ -3235,7 +3236,7 @@ It is &lt;b&gt;strongly&lt;/b&gt; recommended that you &lt;a href=&quot;http://m
     </message>
     <message>
         <location/>
-        <location filename="ConnectDialog.cpp" line="-747"/>
+        <location filename="ConnectDialog.cpp" line="-786"/>
         <source>&amp;Edit...</source>
         <translation type="unfinished"/>
     </message>
@@ -3340,14 +3341,14 @@ Username to send to the server. Be aware that the server can impose restrictions
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="ConnectDialog.cpp" line="-121"/>
+        <location filename="ConnectDialog.cpp" line="-126"/>
         <source>Add Server</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="ConnectDialogEdit.ui"/>
         <source>Password</source>
-        <translation type="unfinished"/>
+        <translation>Парола</translation>
     </message>
     <message>
         <location/>
@@ -3379,22 +3380,22 @@ Label of the server. This is what the server will be named like in your server l
     <message>
         <location/>
         <source>127.0.0.1</source>
-        <translation type="unfinished"/>
+        <translation>127.0.0.1</translation>
     </message>
     <message>
         <location/>
         <source>64738</source>
-        <translation type="unfinished"/>
+        <translation>64738</translation>
     </message>
     <message>
         <location/>
         <source>Your username</source>
-        <translation type="unfinished"/>
+        <translation>Вашето потребителско име</translation>
     </message>
     <message>
         <location/>
         <source>Your password</source>
-        <translation type="unfinished"/>
+        <translation>Вашата парола</translation>
     </message>
 </context>
 <context>
@@ -3410,7 +3411,7 @@ Label of the server. This is what the server will be named like in your server l
     <message>
         <location filename="CrashReporter.cpp" line="+40"/>
         <source>Mumble Crash Report</source>
-        <translation type="unfinished"/>
+        <translation>Доклад за срутване</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -3420,7 +3421,7 @@ Label of the server. This is what the server will be named like in your server l
     <message>
         <location line="+8"/>
         <source>Email address (optional)</source>
-        <translation type="unfinished"/>
+        <translation>Електронна поща (по избор)</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -3431,12 +3432,12 @@ Label of the server. This is what the server will be named like in your server l
     <message>
         <location line="+5"/>
         <source>Send Report</source>
-        <translation type="unfinished"/>
+        <translation>Изпращане на доклад</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Don&apos;t send report</source>
-        <translation type="unfinished"/>
+        <translation>Без изпращане на доклад</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -3467,12 +3468,12 @@ Label of the server. This is what the server will be named like in your server l
     <message>
         <location line="+102"/>
         <source>Uploading crash report</source>
-        <translation type="unfinished"/>
+        <translation>Качване на доклада</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Abort upload</source>
-        <translation type="unfinished"/>
+        <translation>Прекратяване на качването</translation>
     </message>
 </context>
 <context>
@@ -3524,7 +3525,7 @@ Label of the server. This is what the server will be named like in your server l
 <context>
     <name>Database</name>
     <message>
-        <location filename="Database.cpp" line="+118"/>
+        <location filename="Database.cpp" line="+117"/>
         <source>Mumble failed to initialize a database in any
 of the possible locations.</source>
         <translation type="unfinished"/>
@@ -3549,7 +3550,7 @@ of the possible locations.</source>
     <message>
         <location filename="GlobalShortcut.ui"/>
         <source>Shortcuts</source>
-        <translation type="unfinished"/>
+        <translation>Преки пътища</translation>
     </message>
     <message>
         <location/>
@@ -3559,17 +3560,17 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>Function</source>
-        <translation type="unfinished"/>
+        <translation>Функция</translation>
     </message>
     <message>
         <location/>
         <source>Data</source>
-        <translation type="unfinished"/>
+        <translation>Данни</translation>
     </message>
     <message>
         <location/>
         <source>Shortcut</source>
-        <translation type="unfinished"/>
+        <translation>Пряк път</translation>
     </message>
     <message>
         <location/>
@@ -3579,7 +3580,7 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>Add new shortcut</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне на нов пряк път</translation>
     </message>
     <message>
         <location/>
@@ -3589,7 +3590,7 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>&amp;Add</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Добавяне</translation>
     </message>
     <message>
         <location/>
@@ -3604,7 +3605,7 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Премахване</translation>
     </message>
     <message>
         <location/>
@@ -3619,7 +3620,7 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>Skip</source>
-        <translation type="unfinished"/>
+        <translation>Пропускане</translation>
     </message>
     <message>
         <location/>
@@ -3630,9 +3631,14 @@ of the possible locations.</source>
 <context>
     <name>GlobalShortcutConfig</name>
     <message>
-        <location filename="GlobalShortcut.cpp" line="+654"/>
-        <source>Shortcuts</source>
+        <location filename="GlobalShortcut.cpp" line="+565"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mumble can currently only use mouse buttons and keyboard modifier keys (Alt, Ctrl, Cmd, etc.) for global shortcuts.&lt;/p&gt;&lt;p&gt;If you want more flexibility, you can add Mumble as a trusted accessibility program in the Security &amp; Privacy section of your Mac&apos;s System Preferences.&lt;/p&gt;&lt;p&gt;In the Security &amp; Privacy preference pane, change to the Privacy tab. Then choose Accessibility (near the bottom) in the list to the left. Finally, add Mumble to the list of trusted accessibility programs.&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <location line="+115"/>
+        <source>Shortcuts</source>
+        <translation>Преки пътища</translation>
     </message>
     <message>
         <location line="+52"/>
@@ -3686,17 +3692,17 @@ of the possible locations.</source>
     <message>
         <location/>
         <source>List of users</source>
-        <translation type="unfinished"/>
+        <translation>Списък с потребители</translation>
     </message>
     <message>
         <location/>
         <source>Add</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне</translation>
     </message>
     <message>
         <location/>
         <source>Remove</source>
-        <translation type="unfinished"/>
+        <translation>Премахване</translation>
     </message>
     <message>
         <location/>
@@ -3742,7 +3748,7 @@ of the possible locations.</source>
 <context>
     <name>GlobalShortcutX</name>
     <message>
-        <location filename="GlobalShortcut_unix.cpp" line="+378"/>
+        <location filename="GlobalShortcut_unix.cpp" line="+379"/>
         <source>Mouse %1</source>
         <translation type="unfinished"/>
     </message>
@@ -3770,17 +3776,17 @@ of the possible locations.</source>
     <message>
         <location filename="LCD.ui"/>
         <source>Form</source>
-        <translation type="unfinished"/>
+        <translation>Форма</translation>
     </message>
     <message>
         <location/>
         <source>Devices</source>
-        <translation type="unfinished"/>
+        <translation>Устройства</translation>
     </message>
     <message>
         <location/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location/>
@@ -3795,12 +3801,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Size</source>
-        <translation type="unfinished"/>
+        <translation>Размер</translation>
     </message>
     <message>
         <location/>
         <source>Enabled</source>
-        <translation type="unfinished"/>
+        <translation>Включено</translation>
     </message>
     <message>
         <location/>
@@ -4052,27 +4058,27 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location filename="Log.ui"/>
         <source>Messages</source>
-        <translation type="unfinished"/>
+        <translation>Съобщения</translation>
     </message>
     <message>
         <location/>
         <source>Message</source>
-        <translation type="unfinished"/>
+        <translation>Съобщение</translation>
     </message>
     <message>
         <location/>
         <source>Console</source>
-        <translation type="unfinished"/>
+        <translation>Конзола</translation>
     </message>
     <message>
         <location/>
         <source>Notification</source>
-        <translation type="unfinished"/>
+        <translation>Известие</translation>
     </message>
     <message>
         <location/>
         <source>Text-To-Speech</source>
-        <translation type="unfinished"/>
+        <translation>Текст-към-реч</translation>
     </message>
     <message>
         <location/>
@@ -4082,17 +4088,17 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Path</source>
-        <translation type="unfinished"/>
+        <translation>Път</translation>
     </message>
     <message>
         <location/>
         <source>Text To Speech</source>
-        <translation type="unfinished"/>
+        <translation>Текст към реч</translation>
     </message>
     <message>
         <location/>
         <source>Volume</source>
-        <translation type="unfinished"/>
+        <translation>Гръмкост</translation>
     </message>
     <message>
         <location/>
@@ -4127,7 +4133,7 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Whisper</source>
-        <translation type="unfinished"/>
+        <translation>Шепнене</translation>
     </message>
     <message>
         <location/>
@@ -4206,7 +4212,7 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location line="+1"/>
         <source>Move</source>
-        <translation type="unfinished"/>
+        <translation>Преместване</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -4217,7 +4223,7 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location line="+7"/>
         <source>User Interface</source>
-        <translation type="unfinished"/>
+        <translation>Потребителски интерфейс</translation>
     </message>
     <message>
         <location filename="LookConfig.ui"/>
@@ -4257,12 +4263,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Language</source>
-        <translation type="unfinished"/>
+        <translation>Език</translation>
     </message>
     <message>
         <location/>
         <source>Language to use (requires restart)</source>
-        <translation type="unfinished"/>
+        <translation>Език за използване (изисква рестартиране)</translation>
     </message>
     <message>
         <location/>
@@ -4272,12 +4278,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Look and Feel</source>
-        <translation type="unfinished"/>
+        <translation>Външен вид</translation>
     </message>
     <message>
         <location/>
         <source>Layout</source>
-        <translation type="unfinished"/>
+        <translation>Оформление</translation>
     </message>
     <message>
         <location/>
@@ -4448,12 +4454,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location/>
         <source>Theme</source>
-        <translation type="unfinished"/>
+        <translation>Тема</translation>
     </message>
     <message>
         <location/>
         <source>Theme to use to style the user interface</source>
-        <translation type="unfinished"/>
+        <translation>Тема, която да оформи потребителския интерфейс</translation>
     </message>
     <message>
         <location/>
@@ -4464,13 +4470,13 @@ This field describes the size of an LCD device. The size is given either in pixe
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="MainWindow.cpp" line="+141"/>
-        <location line="+2542"/>
+        <location filename="MainWindow.cpp" line="+145"/>
+        <location line="+2561"/>
         <source>Root</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-2488"/>
+        <location line="-2507"/>
         <source>Push-to-Talk</source>
         <comment>Global Shortcut</comment>
         <translation type="unfinished"/>
@@ -4548,29 +4554,29 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location filename="MainWindow.cpp" line="+4"/>
-        <location line="+155"/>
-        <location line="+2477"/>
+        <location line="+153"/>
+        <location line="+2503"/>
         <source>Mumble -- %1</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-2605"/>
+        <location line="-2629"/>
         <source>&amp;Window</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location line="+2"/>
-        <location line="+171"/>
+        <location line="+184"/>
         <source>Minimize</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-171"/>
+        <location line="-184"/>
         <source>Ctrl+M</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+170"/>
+        <location line="+183"/>
         <source>Close</source>
         <translation type="unfinished"/>
     </message>
@@ -4580,7 +4586,7 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-234"/>
+        <location line="-247"/>
         <source>Mute Self</source>
         <comment>Global Shortcut</comment>
         <translation type="unfinished"/>
@@ -4623,15 +4629,15 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location line="+75"/>
-        <location line="+2621"/>
+        <location line="+2645"/>
         <source>&lt;center&gt;Not connected&lt;/center&gt;</source>
         <oldsource>Not connected</oldsource>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-2267"/>
+        <location line="-2270"/>
         <source>Clear</source>
-        <translation type="unfinished"/>
+        <translation>Изчистване</translation>
     </message>
     <message>
         <location line="+50"/>
@@ -4675,7 +4681,7 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location line="+15"/>
-        <location line="+206"/>
+        <location line="+205"/>
         <source>Connecting to server %1.</source>
         <translation type="unfinished"/>
     </message>
@@ -4686,12 +4692,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location line="+76"/>
-        <location line="+1492"/>
+        <location line="+1486"/>
         <source>Transmit Mode set to Continuous</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-1398"/>
+        <location line="-1392"/>
         <source>&lt;p&gt;%1 (%2)&lt;br /&gt;%3&lt;/p&gt;</source>
         <translation type="unfinished"/>
     </message>
@@ -4702,18 +4708,18 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location line="-173"/>
-        <location line="+449"/>
+        <location line="+443"/>
         <source>Register yourself as %1</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-449"/>
-        <location line="+449"/>
+        <location line="-443"/>
+        <location line="+443"/>
         <source>&lt;p&gt;You are about to register yourself on this server. This action cannot be undone, and your username cannot be changed once this is done. You will forever be known as &apos;%1&apos; on this server.&lt;/p&gt;&lt;p&gt;Are you sure you want to register yourself?&lt;/p&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-350"/>
+        <location line="-344"/>
         <source>&lt;h2&gt;Version&lt;/h2&gt;&lt;p&gt;Protocol %1&lt;/p&gt;</source>
         <translation type="unfinished"/>
     </message>
@@ -4758,7 +4764,7 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+280"/>
+        <location line="+274"/>
         <source>Register user %1</source>
         <translation type="unfinished"/>
     </message>
@@ -4790,12 +4796,12 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+50"/>
+        <location line="+55"/>
         <source>Connected.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+105"/>
+        <location line="+110"/>
         <source>Server presented a certificate which failed verification.</source>
         <translation type="unfinished"/>
     </message>
@@ -4817,7 +4823,7 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+125"/>
+        <location line="+109"/>
         <source>Choose image file</source>
         <translation type="unfinished"/>
     </message>
@@ -4840,7 +4846,7 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-2945"/>
+        <location line="-2953"/>
         <source>&amp;User</source>
         <translation type="unfinished"/>
     </message>
@@ -4883,12 +4889,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     <message>
         <location line="+89"/>
         <source>Continuous</source>
-        <translation type="unfinished"/>
+        <translation>Постоянно</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Voice Activity</source>
-        <translation type="unfinished"/>
+        <translation>Гласова активност</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -4896,19 +4902,19 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+47"/>
         <source>Mumble - Minimal View -- %1</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+48"/>
+        <location line="+63"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>Отказ</translation>
     </message>
     <message>
-        <location line="+225"/>
+        <location line="+233"/>
         <source>Save Image As...</source>
-        <translation type="unfinished"/>
+        <translation>Запазване на изображението като...</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -4921,24 +4927,24 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+383"/>
+        <location line="+382"/>
         <source>Change your comment</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location line="+41"/>
-        <location line="+1479"/>
+        <location line="+1473"/>
         <source>Transmit Mode set to Voice Activity</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-1474"/>
-        <location line="+1478"/>
+        <location line="-1468"/>
+        <location line="+1472"/>
         <source>Transmit Mode set to Push-to-Talk</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-1333"/>
+        <location line="-1327"/>
         <source>&lt;p&gt;Connected users: %1/%2&lt;/p&gt;</source>
         <translation type="unfinished"/>
     </message>
@@ -4989,12 +4995,12 @@ This field describes the size of an LCD device. The size is given either in pixe
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1501"/>
+        <location line="+1505"/>
         <source>&amp;View Certificate</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-1200"/>
+        <location line="-1210"/>
         <location line="+19"/>
         <source>Enter reason</source>
         <translation type="unfinished"/>
@@ -5096,7 +5102,7 @@ This field describes the size of an LCD device. The size is given either in pixe
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+443"/>
+        <location line="+453"/>
         <source>SSL Verification failed: %1</source>
         <translation type="unfinished"/>
     </message>
@@ -5172,8 +5178,8 @@ Otherwise abort and check your certificate and username.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="-2171"/>
-        <location line="+2392"/>
+        <location line="-2174"/>
+        <location line="+2379"/>
         <source>Images (*.png *.jpg *.jpeg)</source>
         <translation type="unfinished"/>
     </message>
@@ -5185,7 +5191,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Help</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Помощ</translation>
     </message>
     <message>
         <location/>
@@ -5200,17 +5206,17 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Quit Mumble</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Изход от Мъмбъл</translation>
     </message>
     <message>
         <location/>
         <source>Closes the program</source>
-        <translation type="unfinished"/>
+        <translation>Затваря програмата</translation>
     </message>
     <message>
         <location/>
         <source>Exits the application.</source>
-        <translation type="unfinished"/>
+        <translation>Затваря приложението.</translation>
     </message>
     <message>
         <location/>
@@ -5220,7 +5226,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Connect</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Свързване</translation>
     </message>
     <message>
         <location/>
@@ -5230,7 +5236,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Disconnect</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Прекъсване на връзката</translation>
     </message>
     <message>
         <location/>
@@ -5245,7 +5251,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Information</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Информация</translation>
     </message>
     <message>
         <location/>
@@ -5285,22 +5291,22 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>Send a Text Message</source>
-        <translation type="unfinished"/>
+        <translation>Изпращане на текстово съобщение</translation>
     </message>
     <message>
         <location/>
         <source>Sends a text message to another user.</source>
-        <translation type="unfinished"/>
+        <translation>Изпраща текстово съобщение до друг потребител.</translation>
     </message>
     <message>
         <location/>
         <source>&amp;Add</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Добавяне</translation>
     </message>
     <message>
         <location/>
         <source>Add new channel</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне на нов канал</translation>
     </message>
     <message>
         <location/>
@@ -5310,12 +5316,12 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Премахване</translation>
     </message>
     <message>
         <location/>
         <source>Remove channel</source>
-        <translation type="unfinished"/>
+        <translation>Премахване на канал</translation>
     </message>
     <message>
         <location/>
@@ -5335,7 +5341,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Link</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Връзка</translation>
     </message>
     <message>
         <location/>
@@ -5447,7 +5453,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Reset</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Нулиране</translation>
     </message>
     <message>
         <location/>
@@ -5492,12 +5498,12 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Text-To-Speech</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Текст-към-реч</translation>
     </message>
     <message>
         <location/>
         <source>Toggle Text-To-Speech</source>
-        <translation type="unfinished"/>
+        <translation>Превключване на Текст-към-реч</translation>
     </message>
     <message>
         <location/>
@@ -5527,7 +5533,7 @@ Otherwise abort and check your certificate and username.</source>
     <message>
         <location/>
         <source>&amp;Settings</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Настройки</translation>
     </message>
     <message>
         <location/>
@@ -6180,7 +6186,7 @@ Otherwise abort and check your certificate and username.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="main.cpp" line="-330"/>
+        <location filename="main.cpp" line="-349"/>
         <source>Usage: mumble [options] [&lt;url&gt;]
 
 &lt;url&gt; specifies a URL to connect to after startup instead of showing
@@ -6243,7 +6249,7 @@ Valid actions are:
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+201"/>
+        <location line="+220"/>
         <source>Welcome to Mumble.</source>
         <translation type="unfinished"/>
     </message>
@@ -6612,7 +6618,7 @@ the channel&apos;s context menu.</source>
     <message>
         <location/>
         <source>Port</source>
-        <translation type="unfinished"/>
+        <translation>Порт</translation>
     </message>
     <message>
         <location/>
@@ -6627,7 +6633,7 @@ the channel&apos;s context menu.</source>
     <message>
         <location/>
         <source>Username</source>
-        <translation type="unfinished"/>
+        <translation>Потребителско име</translation>
     </message>
     <message>
         <location/>
@@ -6642,7 +6648,7 @@ the channel&apos;s context menu.</source>
     <message>
         <location/>
         <source>Password</source>
-        <translation type="unfinished"/>
+        <translation>Парола</translation>
     </message>
     <message>
         <location/>
@@ -6754,7 +6760,7 @@ Prevents the client from downloading images embedded into chat messages with the
         <location line="+3"/>
         <location filename="OverlayUser.cpp" line="+3"/>
         <source>Whisper</source>
-        <translation type="unfinished"/>
+        <translation>Шепнене</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -6766,7 +6772,7 @@ Prevents the client from downloading images embedded into chat messages with the
         <location line="+17"/>
         <location filename="OverlayUser.cpp" line="-110"/>
         <source>Channel</source>
-        <translation type="unfinished"/>
+        <translation>Канал</translation>
     </message>
     <message>
         <location filename="Overlay.cpp" line="+116"/>
@@ -6926,7 +6932,7 @@ Prevents the client from downloading images embedded into chat messages with the
     <message>
         <location/>
         <source>Layout</source>
-        <translation type="unfinished"/>
+        <translation>Оформление</translation>
     </message>
     <message>
         <location/>
@@ -7025,22 +7031,22 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Color</source>
-        <translation type="unfinished"/>
+        <translation>Цвят</translation>
     </message>
     <message>
         <location/>
         <source>Add...</source>
-        <translation type="unfinished"/>
+        <translation>Добавяне...</translation>
     </message>
     <message>
         <location/>
         <source>Remove</source>
-        <translation type="unfinished"/>
+        <translation>Премахване</translation>
     </message>
     <message>
         <location/>
         <source>Font</source>
-        <translation type="unfinished"/>
+        <translation>Шрифт</translation>
     </message>
     <message>
         <location/>
@@ -7070,7 +7076,7 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Show Clock</source>
-        <translation type="unfinished"/>
+        <translation>Показване на часовник</translation>
     </message>
 </context>
 <context>
@@ -7123,12 +7129,12 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Zoom</source>
-        <translation type="unfinished"/>
+        <translation>Мащабиране</translation>
     </message>
     <message>
         <location/>
         <source>Zoom Factor</source>
-        <translation type="unfinished"/>
+        <translation>Коефициент на мащабиране</translation>
     </message>
     <message>
         <location/>
@@ -7143,17 +7149,17 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Avatar</source>
-        <translation type="unfinished"/>
+        <translation>Снимка</translation>
     </message>
     <message>
         <location/>
         <source>User&apos;s name</source>
-        <translation type="unfinished"/>
+        <translation>Име на потребител</translation>
     </message>
     <message>
         <location/>
         <source>Username</source>
-        <translation type="unfinished"/>
+        <translation>Потребителско име</translation>
     </message>
     <message>
         <location/>
@@ -7163,7 +7169,7 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Channel</source>
-        <translation type="unfinished"/>
+        <translation>Канал</translation>
     </message>
     <message>
         <location/>
@@ -7332,7 +7338,7 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location filename="Plugins.ui"/>
         <source>Form</source>
-        <translation type="unfinished"/>
+        <translation>Форма</translation>
     </message>
     <message>
         <location/>
@@ -7402,12 +7408,12 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location/>
         <source>Enabled</source>
-        <translation type="unfinished"/>
+        <translation>Включено</translation>
     </message>
 </context>
 <context>
@@ -7463,7 +7469,7 @@ To upgrade these files to their latest versions, click the button below.</source
 <context>
     <name>QApplication</name>
     <message>
-        <location filename="main.cpp" line="+110"/>
+        <location filename="main.cpp" line="+120"/>
         <source>Failed to restart mumble</source>
         <translation type="unfinished"/>
     </message>
@@ -7476,7 +7482,7 @@ To upgrade these files to their latest versions, click the button below.</source
 <context>
     <name>RichTextEditor</name>
     <message>
-        <location filename="RichTextEditor.cpp" line="+257"/>
+        <location filename="RichTextEditor.cpp" line="+258"/>
         <source>Failed to load image</source>
         <translation type="unfinished"/>
     </message>
@@ -7538,7 +7544,7 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location/>
         <source>Color</source>
-        <translation type="unfinished"/>
+        <translation>Цвят</translation>
     </message>
     <message>
         <location/>
@@ -7612,50 +7618,50 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location line="+6"/>
         <source>LAN</source>
-        <translation type="unfinished"/>
+        <translation>Локална мрежа</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Public Internet</source>
-        <translation type="unfinished"/>
+        <translation>Публичен интернет</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Africa</source>
-        <translation type="unfinished"/>
+        <translation>Африка</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Asia</source>
-        <translation type="unfinished"/>
+        <translation>Азия</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>North America</source>
-        <translation type="unfinished"/>
+        <translation>Северна Америка</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>South America</source>
-        <translation type="unfinished"/>
+        <translation>Южна Америка</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Europe</source>
-        <translation type="unfinished"/>
+        <translation>Европа</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Oceania</source>
-        <translation type="unfinished"/>
+        <translation>Океания</translation>
     </message>
 </context>
 <context>
     <name>ShortcutActionWidget</name>
     <message>
-        <location filename="GlobalShortcut.cpp" line="-576"/>
+        <location filename="GlobalShortcut.cpp" line="-602"/>
         <source>Unassigned</source>
-        <translation type="unfinished"/>
+        <translation>Необозначено</translation>
     </message>
 </context>
 <context>
@@ -7663,22 +7669,22 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location line="+376"/>
         <source>On</source>
-        <translation type="unfinished"/>
+        <translation>Включено</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Off</source>
-        <translation type="unfinished"/>
+        <translation>Изключено</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Toggle</source>
-        <translation type="unfinished"/>
+        <translation>Превключване</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Unassigned</source>
-        <translation type="unfinished"/>
+        <translation>Необозначено</translation>
     </message>
 </context>
 <context>
@@ -7763,17 +7769,17 @@ To upgrade these files to their latest versions, click the button below.</source
     <message>
         <location line="-271"/>
         <source>Off</source>
-        <translation type="unfinished"/>
+        <translation>Изключено</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Toggle</source>
-        <translation type="unfinished"/>
+        <translation>Превключване</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>On</source>
-        <translation type="unfinished"/>
+        <translation>Включено</translation>
     </message>
 </context>
 <context>
@@ -7827,7 +7833,7 @@ An access token is a text string, which can be used as a password for very simpl
     <message>
         <location/>
         <source>&amp;Add</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Добавяне</translation>
     </message>
     <message>
         <location/>
@@ -7837,7 +7843,7 @@ An access token is a text string, which can be used as a password for very simpl
     <message>
         <location/>
         <source>&amp;Remove</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Премахване</translation>
     </message>
 </context>
 <context>
@@ -7851,7 +7857,7 @@ An access token is a text string, which can be used as a password for very simpl
         <location/>
         <location filename="UserEdit.cpp" line="+128"/>
         <source>Remove</source>
-        <translation type="unfinished"/>
+        <translation>Премахване</translation>
     </message>
     <message>
         <location/>
@@ -7910,7 +7916,7 @@ An access token is a text string, which can be used as a password for very simpl
     <message>
         <location/>
         <source>Version</source>
-        <translation type="unfinished"/>
+        <translation>Версия</translation>
     </message>
     <message>
         <location/>
@@ -8068,7 +8074,7 @@ An access token is a text string, which can be used as a password for very simpl
     <message>
         <location line="+5"/>
         <source>%1 kbit/s</source>
-        <translation type="unfinished"/>
+        <translation>%1 кбит/с</translation>
     </message>
     <message>
         <location filename="UserInformation.ui"/>
@@ -8134,13 +8140,18 @@ An access token is a text string, which can be used as a password for very simpl
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="UserLocalVolumeDialog.cpp" line="+43"/>
+        <location filename="UserLocalVolumeDialog.cpp" line="+46"/>
         <source>Adjusting local volume for %1</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location line="+9"/>
-        <source>%1 dB</source>
+        <location filename="UserLocalVolumeDialog.ui"/>
+        <source> dB</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the slider or the text box to change the volume of the user.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-weight:600;&quot;&gt;Attention!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Increasing the volume of a user too much can permanently damage your hearing. It may also increase the background noise of the user.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -8275,7 +8286,7 @@ An access token is a text string, which can be used as a password for very simpl
     <message>
         <location line="+18"/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>Име</translation>
     </message>
     <message>
         <location line="+2"/>

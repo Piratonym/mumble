@@ -1,4 +1,10 @@
+# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Use of this source code is governed by a BSD-style license
+# that can be found in the LICENSE file at the root of the
+# Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
 include(../mumble.pri)
+include(../../python.pri)
 
 DEFINES		*= MUMBLE
 TEMPLATE	= app
@@ -39,7 +45,7 @@ CONFIG(static) {
 
     CONFIG -= static
     CONFIG += shared qt_static mumble_dll
-    DEFINES += USE_MUMBLE_DLL QT_SHARED
+    DEFINES += USE_MUMBLE_DLL
     isEqual(QT_MAJOR_VERSION, 5) {
       # Qt 5 uses an auto-generated .cpp file for importing plugins.
       # However, it is only automatically enabled for TEMPLATE = app.
@@ -47,32 +53,7 @@ CONFIG(static) {
       # This means we'll have to explicitly ask Qt to generate and build the
       # plugin importer.
       CONFIG += force_import_plugins
-
-      # Pretend we're inside a Qt build to get the Qt headers to dllexport correctly.
-      # This is achievable in Qt 4 by defining QT_SHARED, but in Qt 5 we have to
-      # hack our way around it. Even QT_SHARED will give us dllimport unless Qt thinks
-      # it's doing a Qt build.
-      DEFINES += QT_BUILD_CORE_LIB QT_BUILD_GUI_LIB QT_BUILD_WIDGETS_LIB QT_BUILD_NETWORK_LIB QT_BUILD_XML_LIB QT_BUILD_SQL_LIB QT_BUILD_SVG_LIB
     }
-
-    DEF_FILE = $${DESTDIR}/$${TARGET}.def
-
-    QMAKE_LFLAGS += /DEF:$${DEF_FILE}
-    QMAKE_LFLAGS += /ignore:4102 # export of deleting destructor
-    QMAKE_LFLAGS += /ignore:4197 # specified multiple times
-
-    CONFIG(debug, debug|release) {
-      DEF_KIND = debug
-    }
-
-    CONFIG(release, debug|release) {
-      DEF_KIND = release
-    }
-
-    gendef.commands = python ../../scripts/gen-mumble_app-qt-def.py $${DEF_KIND} $$[QT_INSTALL_LIBS] $${DEF_FILE}
-    QMAKE_EXTRA_TARGETS *= gendef
-    PRE_TARGETDEPS *= gendef
-    QMAKE_DISTCLEAN *= $${DEF_FILE}
   }
 
   DEFINES *= USE_STATIC
@@ -210,12 +191,12 @@ SOURCES *= BanEditor.cpp \
     VoiceRecorderDialog.cpp \
     WebFetch.cpp \
     MumbleApplication.cpp \
-    smallft.cpp \
+    ../../3rdparty/smallft-src/smallft.cpp \
     ThemeInfo.cpp \
     Themes.cpp \
     OverlayPositionableItem.cpp
 
-DIST		*= ../../icons/mumble.ico licenses.h smallft.h ../../icons/mumble.xpm murmur_pch.h mumble.plist
+DIST		*= ../../icons/mumble.ico licenses.h ../../icons/mumble.xpm murmur_pch.h mumble.plist
 RESOURCES	*= mumble.qrc mumble_translations.qrc mumble_flags.qrc ../../themes/MumbleTheme.qrc
 FORMS *= ConfigDialog.ui \
     MainWindow.ui \
@@ -251,7 +232,8 @@ FORMS *= ConfigDialog.ui \
 include(translations.pri)
 
 PRECOMPILED_HEADER = mumble_pch.hpp
-INCLUDEPATH *= ../bonjour
+INCLUDEPATH *= ../../3rdparty/qqbonjour-src
+INCLUDEPATH *= ../../3rdparty/smallft-src
 
 CONFIG(static) {
   # Ensure that static Mumble.app on Mac OS X
@@ -277,6 +259,13 @@ isEmpty(QMAKE_LRELEASE) {
   }
 }
 
+!CONFIG(no-manual-plugin) {
+  SOURCES *= ManualPlugin.cpp
+  HEADERS *= ManualPlugin.h
+  FORMS *= ManualPlugin.ui
+  DEFINES *= USE_MANUAL_PLUGIN
+}
+
 unix:!CONFIG(bundled-speex):system(pkg-config --atleast-version=1.2 speexdsp):system(pkg-config --atleast-version=1.2 speex) {
   CONFIG	*= no-bundled-speex
 }
@@ -295,7 +284,8 @@ CONFIG(no-xinput2) {
 }
 
 CONFIG(no-bundled-speex) {
-  PKGCONFIG	*= speex speexdsp
+  must_pkgconfig(speex)
+  must_pkgconfig(speexdsp)
 }
 
 !CONFIG(no-bundled-speex) {
@@ -332,8 +322,7 @@ CONFIG(sbcelt) {
 !win32:!macx:!CONFIG(no-dbus) {
   CONFIG		*= dbus
 }
-
-!freebsd:!CONFIG(no-g15) {
+!contains(UNAME, FreeBSD):!CONFIG(no-g15) {
   CONFIG *= g15
 }
 
@@ -346,7 +335,7 @@ CONFIG(no-vorbis-recording) {
 }
 
 unix:!CONFIG(bundled-opus):system(pkg-config --exists opus) {
-  PKGCONFIG *= opus
+  must_pkgconfig(opus)
   DEFINES *= USE_OPUS
 } else {
   !CONFIG(no-opus) {
@@ -370,16 +359,11 @@ win32 {
   } else {
     RC_FILE = mumble.rc
   }
-  HEADERS	*= GlobalShortcut_win.h Overlay_win.h TaskList.h
-  SOURCES	*= GlobalShortcut_win.cpp TextToSpeech_win.cpp Overlay_win.cpp SharedMemory_win.cpp Log_win.cpp os_win.cpp TaskList.cpp ../../overlay/HardHook.cpp ../../overlay/ods.cpp
-  LIBS		*= -ldxguid -ldinput8 -lsapi -lole32 -lws2_32 -ladvapi32 -lwintrust -ldbghelp -llibsndfile-1 -lshell32 -lshlwapi -luser32 -lgdi32 -lpsapi
+  HEADERS	*= GlobalShortcut_win.h Overlay_win.h TaskList.h UserLockFile.h
+  SOURCES	*= GlobalShortcut_win.cpp TextToSpeech_win.cpp Overlay_win.cpp SharedMemory_win.cpp Log_win.cpp os_win.cpp TaskList.cpp ../../overlay/ods.cpp UserLockFile_win.cpp
+  LIBS		*= -ldxguid -ldinput8 -lsapi -lole32 -lws2_32 -ladvapi32 -lwintrust -ldbghelp -lshell32 -lshlwapi -luser32 -lgdi32 -lpsapi
+  LIBS		*= -logg -lvorbis -lvorbisfile -lFLAC -lsndfile
   LIBS		*= -ldelayimp -delayload:shell32.dll
-
-  equals(QMAKE_TARGET.arch, x86_64) {
-    DEFINES += USE_MINHOOK
-    INCLUDEPATH *= ../../3rdparty/minhook-src/include
-    LIBS *= -lminhook
-  }
 
   DEFINES	*= WIN32
   !CONFIG(no-asio) {
@@ -400,6 +384,19 @@ win32 {
     SOURCES *= GKey.cpp
     DEFINES *= USE_GKEY
   }
+
+  !CONFIG(no-xboxinput) {
+    CONFIG *= xboxinput
+  }
+  CONFIG(xboxinput) {
+    HEADERS *= XboxInput.h
+    SOURCES *= XboxInput.cpp
+    DEFINES *= USE_XBOXINPUT
+  }
+
+  # XInputCheck (3rdparty/xinputheck-src)
+  INCLUDEPATH *= ../../3rdparty/xinputcheck-src
+  LIBS *= -lxinputcheck
 
   !CONFIG(mumble_dll) {
     !CONFIG(no-elevation) {
@@ -433,7 +430,7 @@ unix {
 
   CONFIG *= link_pkgconfig
 
-  PKGCONFIG *= sndfile
+  must_pkgconfig(sndfile)
 
   macx {
     TARGET = Mumble
@@ -443,9 +440,9 @@ unix {
 
     LIBS += -framework Security -framework SecurityInterface -framework ApplicationServices
 
-    HEADERS *= GlobalShortcut_macx.h ConfigDialogDelegate.h
+    HEADERS *= GlobalShortcut_macx.h ConfigDialogDelegate.h AppNap.h
     SOURCES *= SharedMemory_unix.cpp
-    OBJECTIVE_SOURCES *= TextToSpeech_macx.mm GlobalShortcut_macx.mm os_macx.mm Log_macx.mm
+    OBJECTIVE_SOURCES *= TextToSpeech_macx.mm GlobalShortcut_macx.mm os_macx.mm Log_macx.mm AppNap.mm
 
     !CONFIG(no-cocoa) {
         DEFINES *= USE_COCOA
@@ -475,8 +472,13 @@ unix {
   } else {
     HEADERS *= GlobalShortcut_unix.h
     SOURCES *= GlobalShortcut_unix.cpp TextToSpeech_unix.cpp Overlay_unix.cpp SharedMemory_unix.cpp Log_unix.cpp
-    PKGCONFIG *= x11
+    must_pkgconfig(x11)
     LIBS *= -lrt -lXi
+
+    # For MumbleSSL::qsslSanityCheck()
+    contains(UNAME, Linux) {
+      LIBS *= -ldl
+    }
 
     !CONFIG(no-oss) {
       CONFIG  *= oss
@@ -496,7 +498,7 @@ unix {
 
 alsa {
 	DEFINES *= USE_ALSA
-	PKGCONFIG *= alsa
+	must_pkgconfig(alsa)
 	HEADERS *= ALSAAudio.h
 	SOURCES *= ALSAAudio.cpp
 }
@@ -510,14 +512,14 @@ oss {
 
 pulseaudio {
 	DEFINES *= USE_PULSEAUDIO
-	PKGCONFIG *= libpulse
+	must_pkgconfig(libpulse)
 	HEADERS *= PulseAudio.h
 	SOURCES *= PulseAudio.cpp
 }
 
 portaudio {
 	DEFINES *= USE_PORTAUDIO
-	PKGCONFIG *= portaudio-2.0
+	must_pkgconfig(portaudio-2.0)
 	HEADERS *= PAAudio.h
 	SOURCES *= PAAudio.cpp
 }
@@ -533,8 +535,15 @@ asio {
 bonjour {
 	DEFINES *= USE_BONJOUR
 
-	HEADERS *= ../bonjour/BonjourRecord.h ../bonjour/BonjourServiceResolver.h ../bonjour/BonjourServiceBrowser.h BonjourClient.h
-	SOURCES *= ../bonjour/BonjourServiceResolver.cpp ../bonjour/BonjourServiceBrowser.cpp BonjourClient.cpp
+	HEADERS *= \
+		../../3rdparty/qqbonjour-src/BonjourRecord.h \
+		../../3rdparty/qqbonjour-src/BonjourServiceResolver.h \
+		../../3rdparty/qqbonjour-src/BonjourServiceBrowser.h \
+		BonjourClient.h
+	SOURCES *= \
+		../../3rdparty/qqbonjour-src/BonjourServiceResolver.cpp \
+		../../3rdparty/qqbonjour-src/BonjourServiceBrowser.cpp \
+		BonjourClient.cpp
 	win32 {
 		INCLUDEPATH *= "$$BONJOUR_PATH/include"
 		QMAKE_LIBDIR *= "$$BONJOUR_PATH/lib/win32"
@@ -542,7 +551,8 @@ bonjour {
 	}
 	unix:!macx {
 		system(pkg-config --exists avahi-compat-libdns_sd avahi-client) {
-			PKGCONFIG *= avahi-compat-libdns_sd avahi-client
+			must_pkgconfig(avahi-compat-libdns_sd)
+			must_pkgconfig(avahi-client)
 		} else {
 			LIBS *= -ldns_sd
 		}
@@ -560,7 +570,7 @@ speechd {
 	DEFINES *= USE_SPEECHD
 	system(pkg-config --atleast-version=0.8 speech-dispatcher) {
 		DEFINES *= USE_SPEECHD_PKGCONFIG
-		PKGCONFIG *= speech-dispatcher
+		must_pkgconfig(speech-dispatcher)
 	} else {
 		LIBS *= -lspeechd
 		INCLUDEPATH	*= /usr/include/speech-dispatcher
@@ -587,7 +597,7 @@ g15 {
 		SOURCES *= G15LCDEngine_helper.cpp
 		HEADERS *= G15LCDEngine_helper.h ../../g15helper/g15helper.h
 	}
-	unix:!macx:!freebsd {
+	unix:!macx:!contains(UNAME, FreeBSD) {
 		SOURCES *= G15LCDEngine_unix.cpp
 		HEADERS *= G15LCDEngine_unix.h
 		LIBS *= -lg15daemon_client
@@ -629,9 +639,9 @@ CONFIG(no-update) {
 			error(Failed to run lrelease for $$fn)
 		}
 	}
-	GENQRC = ../../scripts/generate-mumble_qt-qrc.py
+	GENQRC = $$PYTHON ../../scripts/generate-mumble_qt-qrc.py
 	win32 {
-		GENQRC = python ..\\..\\scripts\\generate-mumble_qt-qrc.py
+		GENQRC = $$PYTHON ..\\..\\scripts\\generate-mumble_qt-qrc.py
 	}
 	!system($$GENQRC mumble_qt_auto.qrc $$[QT_INSTALL_TRANSLATIONS] $$QT_TRANSLATIONS_FALLBACK_DIR) {
 		error(Failed to run generate-mumble_qt-qrc.py script)

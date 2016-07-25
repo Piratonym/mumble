@@ -1,32 +1,7 @@
-/* Copyright (C) 2005-2011, Thorvald Natvig <thorvald@natvig.com>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "murmur_pch.h"
 
@@ -84,6 +59,9 @@ static void murmurMessageOutputQString(QtMsgType type, const QString &msg) {
 			break;
 		}
 		syslog(level, "%s", qPrintable(msg));
+		if (type == QtFatalMsg) {
+			exit(1);
+		}
 		return;
 	}
 #endif
@@ -146,7 +124,7 @@ static void murmurMessageOutputQString(QtMsgType type, const QString &msg) {
 #else
 		::MessageBoxA(NULL, qPrintable(m), "Murmur", MB_OK | MB_ICONWARNING);
 #endif
-		exit(0);
+		exit(1);
 	}
 }
 
@@ -167,6 +145,12 @@ void IceStart();
 void IceStop();
 #endif
 
+#ifdef USE_GRPC
+// From MurmurGRPCImpl.cpp.
+void GRPCStart();
+void GRPCStop();
+#endif
+
 int main(int argc, char **argv) {
 	// Check for SSE and MMX, but only in the windows binaries
 #ifdef Q_OS_WIN
@@ -180,6 +164,7 @@ int main(int argc, char **argv) {
 	}
 
 	SetDllDirectory(L"");
+
 #endif
 	int res;
 
@@ -209,6 +194,8 @@ int main(int argc, char **argv) {
 	a.setOrganizationName("Mumble");
 	a.setOrganizationDomain("mumble.sourceforge.net");
 
+	MumbleSSL::initialize();
+
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 #if QT_VERSION < 0x050000
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -231,6 +218,7 @@ int main(int argc, char **argv) {
 
 	QString inifile;
 	QString supw;
+	bool disableSu = false;
 	bool wipeSsl = false;
 	bool wipeLogs = false;
 	int sunum = 1;
@@ -280,6 +268,14 @@ int main(int argc, char **argv) {
 			}
 			bLast = true;
 #endif
+		} else if ((arg == "-disablesu")) {
+		        detach = false;
+		        disableSu = true;
+		        if (i+1 < args.size()) {
+		                i++;
+		                sunum = args.at(i).toInt();
+		        }
+		        bLast = true;
 		} else if ((arg == "-ini") && (i+1 < args.size())) {
 			i++;
 			inifile = args.at(i);
@@ -301,6 +297,9 @@ int main(int argc, char **argv) {
 			       "  -supw <pw> [srv] Set password for 'SuperUser' account on server srv.\n"
 #ifdef Q_OS_UNIX
 			       "  -readsupw [srv]  Reads password for server srv from standard input.\n"
+#endif
+			       "  -disablesu [srv] Disable password for 'SuperUser' account on server srv.\n"
+#ifdef Q_OS_UNIX
 			       "  -limits          Tests and shows how many file descriptors and threads can be created.\n"
 			       "                   The purpose of this option is to test how many clients Murmur can handle.\n"
 			       "                   Murmur will exit after this test.\n"
@@ -413,6 +412,11 @@ int main(int argc, char **argv) {
 		qFatal("Superuser password set on server %d", sunum);
 	}
 
+	if (disableSu) {
+	        ServerDB::disableSU(sunum);
+	        qFatal("SuperUser password disabled on server %d", sunum);
+	}
+
 	if (wipeSsl) {
 		qWarning("Removing all per-server SSL certificates from the database.");
 		foreach(int sid, ServerDB::getAllServers()) {
@@ -508,6 +512,10 @@ int main(int argc, char **argv) {
 	IceStart();
 #endif
 
+#ifdef USE_GRPC
+	GRPCStart();
+#endif
+
 	meta->getOSInfo();
 
 	int major, minor, patch;
@@ -528,6 +536,10 @@ int main(int argc, char **argv) {
 
 #ifdef USE_ICE
 	IceStop();
+#endif
+
+#ifdef USE_GRPC
+	GRPCStop();
 #endif
 
 	delete qfLog;

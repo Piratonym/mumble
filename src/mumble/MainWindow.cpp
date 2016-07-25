@@ -1,33 +1,7 @@
-/* Copyright (C) 2005-2011, Thorvald Natvig <thorvald@natvig.com>
-   Copyright (C) 2009-2011, Stefan Hacker <dd0t@users.sourceforge.net>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "mumble_pch.hpp"
 
@@ -73,6 +47,10 @@
 
 #ifdef Q_OS_WIN
 #include "TaskList.h"
+#endif
+
+#ifdef Q_OS_MAC
+#include "AppNap.h"
 #endif
 
 #ifdef USE_COCOA
@@ -360,12 +338,10 @@ void MainWindow::setupGui()  {
 	else if (! g.s.bMinimalView && ! g.s.qbaMainWindowGeometry.isNull())
 		restoreGeometry(g.s.qbaMainWindowGeometry);
 
-	Settings::WindowLayout wlTmp = g.s.wlWindowLayout;
 	if (g.s.bMinimalView && ! g.s.qbaMinimalViewState.isNull())
 		restoreState(g.s.qbaMinimalViewState);
 	else if (! g.s.bMinimalView && ! g.s.qbaMainWindowState.isNull())
 		restoreState(g.s.qbaMainWindowState);
-	g.s.wlWindowLayout = wlTmp;
 
 	setupView(false);
 
@@ -395,6 +371,21 @@ void MainWindow::updateWindowTitle() {
 		title = tr("Mumble -- %1");
 	}
 	setWindowTitle(title.arg(QLatin1String(MUMBLE_RELEASE)));
+}
+
+void MainWindow::updateToolbar() {
+	bool layoutIsCustom = g.s.wlWindowLayout == Settings::LayoutCustom;
+
+	qtIconToolbar->setMovable(layoutIsCustom);
+
+	// Update the toolbar so the movable flag takes effect.
+	if (layoutIsCustom) {
+		// Update the toolbar, but keep it in place.
+		addToolBar(toolBarArea(qtIconToolbar), qtIconToolbar);
+	} else {
+		// Update the toolbar, and ensure it is at the top of the window.
+		addToolBar(Qt::TopToolBarArea, qtIconToolbar);
+	}
 }
 
 // Sets whether or not to show the title bars on the MainWindow's
@@ -512,6 +503,53 @@ void MainWindow::changeEvent(QEvent *e) {
 	}
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *e) {
+	// Pressing F6 switches between the main
+	// window's main widgets, making it easier
+	// to navigate Mumble's MainWindow with only
+	// a keyboard.
+	if (e->key() == Qt::Key_F6) {
+		focusNextMainWidget();
+	} else {
+		QMainWindow::keyPressEvent(e);
+	}
+}
+
+/// focusNextMainWidget switches the focus to the next main
+/// widget of the MainWindow.
+///
+/// This is used to implement behavior where pressing F6
+/// switches between major elements of an application.
+/// This behavior is for example seen in Windows's (File) Explorer.
+///
+/// The main widgets are qteLog (the log view), qteChat (chat input bar)
+/// and qtvUsers (users tree view).
+void MainWindow::focusNextMainWidget() {
+	QWidget *mainFocusWidgets[] = {
+		qteLog,
+		qteChat,
+		qtvUsers,
+	};
+	const int numMainFocusWidgets = sizeof(mainFocusWidgets)/sizeof(mainFocusWidgets[0]);
+
+	int currentMainFocusWidgetIndex = -1;
+
+	QWidget *w = focusWidget();
+	for (int i = 0; i < numMainFocusWidgets; i++) {
+		QWidget *mainFocusWidget = mainFocusWidgets[i];
+		if (w == mainFocusWidget || w->isAncestorOf(mainFocusWidget)) {
+			currentMainFocusWidgetIndex = i;
+			break;
+		}
+	}
+
+	Q_ASSERT(currentMainFocusWidgetIndex != -1);
+
+	int nextMainFocusWidgetIndex = (currentMainFocusWidgetIndex + 1) % numMainFocusWidgets;
+	QWidget *nextMainFocusWidget = mainFocusWidgets[nextMainFocusWidgetIndex];
+	nextMainFocusWidget->setFocus();
+}
+
 void MainWindow::updateTrayIcon() {
 	ClientUser *p=ClientUser::get(g.uiSession);
 
@@ -558,6 +596,14 @@ void MainWindow::updateTransmitModeComboBox() {
 			qcbTransmitMode->setCurrentIndex(2);
 			return;
 	}
+}
+
+QMenu *MainWindow::createPopupMenu() {
+	if (g.s.wlWindowLayout == Settings::LayoutCustom) {
+		return QMainWindow::createPopupMenu();
+	}
+
+	return NULL;
 }
 
 Channel *MainWindow::getContextMenuChannel() {
@@ -678,7 +724,7 @@ void MainWindow::saveImageAs() {
 	QDateTime now = QDateTime::currentDateTime();
 	QString defaultFname = QString::fromLatin1("Mumble-%1.jpg").arg(now.toString(QString::fromLatin1("yyyy-MM-dd-HHmmss")));
 
-	QString fname = QFileDialog::getSaveFileName(this, tr("Save Image File"), defaultFname, tr("Images (*.png *.jpg *.jpeg)"));
+	QString fname = QFileDialog::getSaveFileName(this, tr("Save Image File"), getImagePath(defaultFname), tr("Images (*.png *.jpg *.jpeg)"));
 	if (fname.isNull()) {
 		return;
 	}
@@ -690,11 +736,33 @@ void MainWindow::saveImageAs() {
 	if (!ok) {
 		// In case fname did not contain a file extension, try saving with an
 		// explicit format.
-		ok = img.save(fname, "JPG");
+		ok = img.save(fname, "PNG");
 	}
+
+	updateImagePath(fname);
+
 	if (!ok) {
 		g.l->log(Log::Warning, tr("Could not save image: %1").arg(Qt::escape(fname)));
 	}
+}
+
+QString MainWindow::getImagePath(QString filename) const {
+	if (g.s.qsImagePath.isEmpty() || ! QDir(g.s.qsImagePath).exists()) {
+#if QT_VERSION >= 0x050000
+		g.s.qsImagePath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+#else
+		g.s.qsImagePath = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation);
+#endif
+	}
+	if (filename.isEmpty()) {
+		return g.s.qsImagePath;
+	}
+	return g.s.qsImagePath + QDir::separator() + filename;
+}
+
+void MainWindow::updateImagePath(QString filepath) const {
+	QFileInfo fi(filepath);
+	g.s.qsImagePath = fi.absolutePath();
 }
 
 static void recreateServerHandler() {
@@ -878,9 +946,7 @@ void MainWindow::setOnTop(bool top) {
 void MainWindow::setupView(bool toggle_minimize) {
 	bool showit = ! g.s.bMinimalView;
 
-	// Update window layout
-	Settings::WindowLayout wlTmp = g.s.wlWindowLayout;
-	switch (wlTmp) {
+	switch (g.s.wlWindowLayout) {
 		case Settings::LayoutClassic:
 			removeDockWidget(qdwLog);
 			addDockWidget(Qt::LeftDockWidgetArea, qdwLog);
@@ -904,11 +970,12 @@ void MainWindow::setupView(bool toggle_minimize) {
 			qdwChat->show();
 			break;
 		default:
-			wlTmp = Settings::LayoutCustom;
 			break;
 	}
+
+	updateToolbar();
+
 	qteChat->updateGeometry();
-	g.s.wlWindowLayout = wlTmp;
 
 	QRect geom = frameGeometry();
 
@@ -1528,8 +1595,7 @@ void MainWindow::on_qaUserLocalVolume_triggered() {
 
 void MainWindow::openUserLocalVolumeDialog(ClientUser *p) {
 	unsigned int session = p->uiSession;
-	UserLocalVolumeDialog *uservol = new UserLocalVolumeDialog(session);
-	uservol->show();
+	UserLocalVolumeDialog::present(session, &qmUserVolTracker);
 }
 
 void MainWindow::on_qaUserDeaf_triggered() {
@@ -1785,6 +1851,13 @@ void MainWindow::sendChatbarMessage(QString qsText) {
  */
 void MainWindow::on_qteChat_tabPressed() {
 	qteChat->completeAtCursor();
+}
+
+/// Handles Backtab/Shift-Tab for qteChat, which allows
+/// users to move focus to the previous widget in
+/// MainWindow.
+void MainWindow::on_qteChat_backtabPressed() {
+	focusPreviousChild();
 }
 
 /**
@@ -2692,6 +2765,11 @@ void MainWindow::serverConnected() {
 #endif
 	g.iCodecBeta = 0;
 
+#ifdef Q_OS_MAC
+	// Suppress AppNap while we're connected to a server.
+	MUSuppressAppNap(true);
+#endif
+
 	g.l->clearIgnore();
 	g.l->setIgnore(Log::UserJoin);
 	g.l->setIgnore(Log::OtherSelfMute);
@@ -2741,6 +2819,11 @@ void MainWindow::serverDisconnected(QAbstractSocket::SocketError err, QString re
 	qtvUsers->setCurrentIndex(QModelIndex());
 	qteChat->setEnabled(false);
 	updateTrayIcon();
+
+#ifdef Q_OS_MAC
+	// Remove App Nap suppression now that we're disconnected.
+	MUSuppressAppNap(false);
+#endif
 
 	QString uname, pw, host;
 	unsigned short port;
@@ -2800,8 +2883,12 @@ void MainWindow::serverDisconnected(QAbstractSocket::SocketError err, QString re
 		if (! g.sh->qscCert.isEmpty()) {
 			QSslCertificate c = g.sh->qscCert.at(0);
 			QString basereason;
-			if (! Database::getDigest(host, port).isNull()) {
+			QString actual_digest = QString::fromLatin1(c.digest(QCryptographicHash::Sha1).toHex());
+			QString digests_section = tr("<li>Server certificate digest (SHA-1):\t%1</li>").arg(ViewCert::prettifyDigest(actual_digest));
+			QString expected_digest = Database::getDigest(host, port);
+			if (! expected_digest.isNull()) {
 				basereason = tr("<b>WARNING:</b> The server presented a certificate that was different from the stored one.");
+				digests_section.append(tr("<li>Expected certificate digest (SHA-1):\t%1</li>").arg(ViewCert::prettifyDigest(expected_digest)));
 			} else {
 				basereason = tr("Server presented a certificate which failed verification.");
 			}
@@ -2810,9 +2897,9 @@ void MainWindow::serverDisconnected(QAbstractSocket::SocketError err, QString re
 				qsl << QString::fromLatin1("<li>%1</li>").arg(Qt::escape(e.errorString()));
 
 			QMessageBox qmb(QMessageBox::Warning, QLatin1String("Mumble"),
-			                tr("<p>%1.<br />The specific errors with this certificate are: </p><ol>%2</ol>"
+			                tr("<p>%1</p><ul>%2</ul><p>The specific errors with this certificate are:</p><ol>%3</ol>"
 			                   "<p>Do you wish to accept this certificate anyway?<br />(It will also be stored so you won't be asked this again.)</p>"
-			                  ).arg(basereason).arg(qsl.join(QString())), QMessageBox::Yes | QMessageBox::No, this);
+			                  ).arg(basereason).arg(digests_section).arg(qsl.join(QString())), QMessageBox::Yes | QMessageBox::No, this);
 
 			qmb.setDefaultButton(QMessageBox::No);
 			qmb.setEscapeButton(QMessageBox::No);
@@ -3048,22 +3135,6 @@ void MainWindow::on_qteLog_highlighted(const QUrl &url) {
 	}
 }
 
-void MainWindow::on_qdwChat_dockLocationChanged(Qt::DockWidgetArea) {
-	g.s.wlWindowLayout = Settings::LayoutCustom;
-}
-
-void MainWindow::on_qdwLog_dockLocationChanged(Qt::DockWidgetArea) {
-	g.s.wlWindowLayout = Settings::LayoutCustom;
-}
-
-void MainWindow::on_qdwChat_visibilityChanged(bool) {
-	g.s.wlWindowLayout = Settings::LayoutCustom;
-}
-
-void MainWindow::on_qdwLog_visibilityChanged(bool) {
-	g.s.wlWindowLayout = Settings::LayoutCustom;
-}
-
 void MainWindow::context_triggered() {
 	QAction *a = qobject_cast<QAction *>(sender());
 
@@ -3086,15 +3157,7 @@ void MainWindow::context_triggered() {
 QPair<QByteArray, QImage> MainWindow::openImageFile() {
 	QPair<QByteArray, QImage> retval;
 
-	if (g.s.qsImagePath.isEmpty() || ! QDir::root().exists(g.s.qsImagePath)) {
-#if QT_VERSION >= 0x050000
-		g.s.qsImagePath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-#else
-		g.s.qsImagePath = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation);
-#endif
-	}
-
-	QString fname = QFileDialog::getOpenFileName(this, tr("Choose image file"), g.s.qsImagePath, tr("Images (*.png *.jpg *.jpeg)"));
+	QString fname = QFileDialog::getOpenFileName(this, tr("Choose image file"), getImagePath(), tr("Images (*.png *.jpg *.jpeg)"));
 
 	if (fname.isNull())
 		return retval;
@@ -3105,8 +3168,7 @@ QPair<QByteArray, QImage> MainWindow::openImageFile() {
 		return retval;
 	}
 
-	QFileInfo fi(f);
-	g.s.qsImagePath = fi.absolutePath();
+	updateImagePath(fname);
 
 	QByteArray qba = f.readAll();
 	f.close();

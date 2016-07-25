@@ -135,3 +135,29 @@
 # define _Restrict
 # define __restrict__
 #endif
+
+// For now, only enable for OS X. We're sure
+// that modern OS X is x86-64, but we can't make
+// the same assumption for other Unix-like OSes.
+#if defined(__APPLE__) && defined(__x86_64__)
+/* Use run-time CPU capabilities detection */
+/* #undef OPUS_HAVE_RTCD */
+
+/* Compiler supports X86 SSE Intrinsics */
+#define OPUS_X86_MAY_HAVE_SSE 1
+
+/* Compiler supports X86 SSE2 Intrinsics */
+#define OPUS_X86_MAY_HAVE_SSE2 1
+
+/* Compiler supports X86 SSE4.1 Intrinsics */
+/* #undef OPUS_X86_MAY_HAVE_SSE4_1 */
+
+/* Define if binary requires SSE intrinsics support */
+#define OPUS_X86_PRESUME_SSE 1
+
+/* Define if binary requires SSE2 intrinsics support */
+#define OPUS_X86_PRESUME_SSE2 1
+
+/* Define if binary requires SSE4.1 intrinsics support */
+/* #undef OPUS_X86_PRESUME_SSE4_1 */
+#endif

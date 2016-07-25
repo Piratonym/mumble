@@ -1,33 +1,7 @@
-/* Copyright (C) 2005-2011, Thorvald Natvig <thorvald@natvig.com>
-   Copyright (C) 2009-2011, Stefan Hacker <dd0t@users.sourceforge.net>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "murmur_pch.h"
 
@@ -43,6 +17,8 @@
 #include "PacketDataStream.h"
 #include "ServerDB.h"
 #include "ServerUser.h"
+#include "Version.h"
+#include "HTMLFilter.h"
 
 #ifdef USE_BONJOUR
 #include "BonjourServer.h"
@@ -360,6 +336,41 @@ Server::~Server() {
 	log("Stopped");
 }
 
+/// normalizeSuggestVersion normalizes a 'suggestversion' config value.
+/// The config value may be a version string, or a bitmasked
+/// integer representing the version.
+/// This function converts the 'suggestversion' config value to
+/// always be a bitmasked integer representation.
+///
+/// On error, the function returns an empty QVariant.
+static QVariant normalizeSuggestVersion(QVariant suggestVersion) {
+	uint integerValue = suggestVersion.toUInt();
+
+	// If the integer value is 0, it can mean two things:
+	//
+	// Either the suggestversion is set to 0.
+	// Or, the suggestversion is a version string such as "1.3.0",
+	// and cannot be converted to an integer value.
+	//
+	// We handle both cases the same: by pretending the
+	// suggestversion is a version string in both cases.
+	//
+	// If it is a version string, the call to MumbleVersion::getRaw()
+	// will return the bitmasked representation.
+	//
+	// If it is not a version string, the call to MumbleVersion::getRaw()
+	// will return 0, so it is effectively a no-op.
+	if (integerValue == 0) {
+		integerValue = MumbleVersion::getRaw(suggestVersion.toString());
+	}
+
+	if (integerValue != 0) {
+		return integerValue;
+	}
+
+	return QVariant();
+}
+
 void Server::readParams() {
 	qsPassword = Meta::mp.qsPassword;
 	usPort = static_cast<unsigned short>(Meta::mp.usPort + iServerNum - 1);
@@ -441,7 +452,7 @@ void Server::readParams() {
 	bCertRequired = getConf("certrequired", bCertRequired).toBool();
 	bForceExternalAuth = getConf("forceExternalAuth", bForceExternalAuth).toBool();
 
-	qvSuggestVersion = getConf("suggestversion", qvSuggestVersion);
+	qvSuggestVersion = normalizeSuggestVersion(getConf("suggestversion", qvSuggestVersion));
 	if (qvSuggestVersion.toUInt() == 0)
 		qvSuggestVersion = QVariant();
 
@@ -566,14 +577,14 @@ void Server::setLiveConf(const QString &key, const QString &value) {
 	else if (key == "channelname")
 		qrChannelName=!v.isNull() ? QRegExp(v) : Meta::mp.qrChannelName;
 	else if (key == "suggestversion")
-		qvSuggestVersion = ! v.isNull() ? (v.isEmpty() ? QVariant() : v) : Meta::mp.qvSuggestVersion;
+		qvSuggestVersion = ! v.isNull() ? (v.isEmpty() ? QVariant() : normalizeSuggestVersion(v)) : Meta::mp.qvSuggestVersion;
 	else if (key == "suggestpositional")
 		qvSuggestPositional = ! v.isNull() ? (v.isEmpty() ? QVariant() : v) : Meta::mp.qvSuggestPositional;
 	else if (key == "suggestpushtotalk")
 		qvSuggestPushToTalk = ! v.isNull() ? (v.isEmpty() ? QVariant() : v) : Meta::mp.qvSuggestPushToTalk;
 	else if (key == "opusthreshold")
 		iOpusThreshold = (i >= 0 && !v.isNull()) ? qBound(0, i, 100) : Meta::mp.iOpusThreshold;
-	else if (key =="channelnestinglimit")
+	else if (key == "channelnestinglimit")
 		iChannelNestingLimit = (i >= 0 && !v.isNull()) ? i : Meta::mp.iChannelNestingLimit;
 }
 
@@ -723,7 +734,7 @@ void Server::run() {
 
 				int sock = fds[i].fd;
 #else
-		{
+		for (int i=0;i<1;++i) {
 			{
 				DWORD ret = WaitForMultipleObjects(nfds, events, FALSE, INFINITE);
 				if (ret == (WAIT_OBJECT_0 + nfds - 1)) {
@@ -775,7 +786,7 @@ void Server::run() {
 					continue;
 				}
 
-				QReadLocker rl(&qrwlUsers);
+				QReadLocker rl(&qrwlVoiceThread);
 
 				quint32 *ping = reinterpret_cast<quint32 *>(encrypt);
 
@@ -809,23 +820,23 @@ void Server::run() {
 				} else {
 					// Unknown peer
 					foreach(ServerUser *usr, qhHostUsers.value(ha)) {
-						if (usr->csCrypt.isValid() && checkDecrypt(usr, encrypt, buffer, len)) {
+						if (checkDecrypt(usr, encrypt, buffer, len)) { // checkDecrypt takes the User's qrwlCrypt lock.
 							// Every time we relock, reverify users' existance.
 							// The main thread might delete the user while the lock isn't held.
 							unsigned int uiSession = usr->uiSession;
 							rl.unlock();
-							qrwlUsers.lockForWrite();
+							qrwlVoiceThread.lockForWrite();
 							if (qhUsers.contains(uiSession)) {
 								u = usr;
 								u->sUdpSocket = sock;
 								memcpy(& u->saiUdpAddress, &from, sizeof(from));
 								qhHostUsers[from].remove(u);
 								qhPeerUsers.insert(key, u);
-								qrwlUsers.unlock();
-								rl.relock();
-								if (! qhUsers.contains(uiSession))
-									u = NULL;
 							}
+							qrwlVoiceThread.unlock();
+							rl.relock();
+							if (u != NULL && !qhUsers.contains(uiSession))
+								u = NULL;
 							break;
 						}
 					}
@@ -844,7 +855,7 @@ void Server::run() {
 						if (bOpus)
 							break;
 					case MessageHandler::UDPVoiceOpus: {
-							u->bUdp = true;
+							u->aiUdpFlag = 1;
 							processMsg(u, buffer, len);
 							break;
 						}
@@ -868,6 +879,8 @@ void Server::run() {
 }
 
 bool Server::checkDecrypt(ServerUser *u, const char *encrypt, char *plain, unsigned int len) {
+	QMutexLocker l(&u->qmCrypt);
+
 	if (u->csCrypt.isValid() && u->csCrypt.decrypt(reinterpret_cast<const unsigned char *>(encrypt), reinterpret_cast<unsigned char *>(plain), len))
 		return true;
 
@@ -881,14 +894,23 @@ bool Server::checkDecrypt(ServerUser *u, const char *encrypt, char *plain, unsig
 }
 
 void Server::sendMessage(ServerUser *u, const char *data, int len, QByteArray &cache, bool force) {
-	if ((u->bUdp || force) && (u->sUdpSocket != INVALID_SOCKET) && u->csCrypt.isValid()) {
+	if ((u->aiUdpFlag.load() == 1 || force) && (u->sUdpSocket != INVALID_SOCKET)) {
 #if defined(__LP64__)
 		STACKVAR(char, ebuffer, len+4+16);
 		char *buffer = reinterpret_cast<char *>(((reinterpret_cast<quint64>(ebuffer) + 8) & ~7) + 4);
 #else
 		STACKVAR(char, buffer, len+4);
 #endif
-		u->csCrypt.encrypt(reinterpret_cast<const unsigned char *>(data), reinterpret_cast<unsigned char *>(buffer), len);
+		{
+			QMutexLocker wl(&u->qmCrypt);
+
+			if (!u->csCrypt.isValid()) {
+				return;
+			}
+
+			u->csCrypt.encrypt(reinterpret_cast<const unsigned char *>(data), reinterpret_cast<unsigned char *>(buffer),
+							   len);
+		}
 #ifdef Q_OS_WIN
 		DWORD dwFlow = 0;
 		if (Meta::hQoS)
@@ -961,11 +983,7 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 	if (u->sState != ServerUser::Authenticated || u->bMute || u->bSuppress || u->bSelfMute)
 		return;
 
-	User *p;
-	BandwidthRecord *bw = & u->bwr;
-	Channel *c = u->cChannel;
 	QByteArray qba, qba_npos;
-	unsigned int counter;
 	char buffer[UDP_PACKET_SIZE];
 	PacketDataStream pdi(data + 1, len - 1);
 	PacketDataStream pds(buffer+1, UDP_PACKET_SIZE-1);
@@ -973,20 +991,22 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 	unsigned int target = data[0] & 0x1f;
 	unsigned int poslen;
 
-	// IP + UDP + Crypt + Data
-	int packetsize = 20 + 8 + 4 + len;
-
 	// Check the voice data rate limit.
-	if (! bw->addFrame(packetsize, iMaxBandwidth/8)) {
-		// Suppress packet.
-		return;
-	}
+	{
+		BandwidthRecord *bw = &u->bwr;
 
-	// Read the sequence number.
-	pdi >> counter;
+		// IP + UDP + Crypt + Data
+		const int packetsize = 20 + 8 + 4 + len;
+
+		if (! bw->addFrame(packetsize, iMaxBandwidth / 8)) {
+			// Suppress packet.
+			 return;
+		}
+	}
 
 	// Skip to the end of the voice data.
 	if ((type >> 5) != MessageHandler::UDPVoiceOpus) {
+		unsigned int counter;
 		do {
 			counter = pdi.next8();
 			pdi.skip(counter & 0x7f);
@@ -1012,8 +1032,10 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 		sendMessage(u, buffer, len, qba);
 		return;
 	} else if (target == 0) { // Normal speech
+		Channel *c = u->cChannel;
+
 		buffer[0] = static_cast<char>(type | 0);
-		foreach(p, c->qlUsers) {
+		foreach(User *p, c->qlUsers) {
 			ServerUser *pDst = static_cast<ServerUser *>(p);
 			SENDTO;
 		}
@@ -1026,7 +1048,7 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 
 			foreach(Channel *l, chans) {
 				if (ChanACL::hasPermission(u, l, ChanACL::Speak, &acCache)) {
-					foreach(p, l->qlUsers) {
+					foreach(User *p, l->qlUsers) {
 						ServerUser *pDst = static_cast<ServerUser *>(p);
 						SENDTO;
 					}
@@ -1055,7 +1077,7 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 						if (!link && !dochildren && ! group) {
 							// Common case
 							if (ChanACL::hasPermission(u, wc, ChanACL::Whisper, &acCache)) {
-								foreach(p, wc->qlUsers) {
+								foreach(User *p, wc->qlUsers) {
 									channel.insert(static_cast<ServerUser *>(p));
 								}
 							}
@@ -1071,7 +1093,7 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 							const QString &qsg = redirect.isEmpty() ? wtc.qsGroup : redirect;
 							foreach(Channel *tc, channels) {
 								if (ChanACL::hasPermission(u, tc, ChanACL::Whisper, &acCache)) {
-									foreach(p, tc->qlUsers) {
+									foreach(User *p, tc->qlUsers) {
 										ServerUser *su = static_cast<ServerUser *>(p);
 										if (! group || Group::isMember(tc, tc, qsg, su)) {
 											channel.insert(su);
@@ -1084,20 +1106,24 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 				}
 			}
 
-			foreach(unsigned int id, wt.qlSessions) {
-				ServerUser *pDst = qhUsers.value(id);
-				if (pDst && ChanACL::hasPermission(u, pDst->cChannel, ChanACL::Whisper, &acCache) && ! channel.contains(pDst))
-					direct.insert(pDst);
+			{
+				QMutexLocker qml(&qmCache);
+
+				foreach(unsigned int id, wt.qlSessions) {
+					ServerUser *pDst = qhUsers.value(id);
+					if (pDst && ChanACL::hasPermission(u, pDst->cChannel, ChanACL::Whisper, &acCache) && !channel.contains(pDst))
+						direct.insert(pDst);
+				}
 			}
 
 			int uiSession = u->uiSession;
-			qrwlUsers.unlock();
-			qrwlUsers.lockForWrite();
+			qrwlVoiceThread.unlock();
+			qrwlVoiceThread.lockForWrite();
 
 			if (qhUsers.contains(uiSession))
 				u->qmTargetCache.insert(target, ServerUser::TargetCache(channel, direct));
-			qrwlUsers.unlock();
-			qrwlUsers.lockForRead();
+			qrwlVoiceThread.unlock();
+			qrwlVoiceThread.lockForRead();
 			if (! qhUsers.contains(uiSession))
 				return;
 		}
@@ -1196,7 +1222,7 @@ void Server::newClient() {
 		HostAddress(sock->localAddress()).toSockaddr(& u->saiTcpLocalAddress);
 
 		{
-			QWriteLocker wl(&qrwlUsers);
+			QWriteLocker wl(&qrwlVoiceThread);
 			qhUsers.insert(u->uiSession, u);
 			qhHostUsers[ha].insert(u);
 		}
@@ -1306,10 +1332,47 @@ void Server::sslError(const QList<QSslError> &errors) {
 		}
 	}
 
-	if (ok)
+	if (ok) {
 		u->proceedAnyway();
-	else
+	} else {
+		// Due to a regression in Qt 5 (QTBUG-53906),
+		// we can't 'force' disconnect (which calls
+		// QAbstractSocket->abort()) when built against Qt 5.
+		//
+		// The bug is that Qt doesn't update the
+		// QSslSocket's socket state when QSslSocket->abort()
+		// is called.
+		//
+		// Our call to abort() happens when QSslSocket is inside
+		// startHandshake(). That is, a handshake is in progress.
+		//
+		// After emitting the peerVerifyError/sslErrors signals,
+		// startHandshake() checks whether the connection is still
+		// in QAbstractSocket::ConectedState.
+		//
+		// Unfortunately, because abort() doesn't update the socket's
+		// state to signal that it is no longer connected, startHandshake()
+		// still thinks the socket is connected and will continue to
+		// attempt to finish the handshake.
+		//
+		// Because abort() tears down a lot of internal state
+		// of the QSslSocket, inlcuding the 'SSL *' object
+		// associated with the socket, this is fatal and leads
+		// to crashes, such as attempting to derefernce a NULL
+		// 'SSL *' object.
+		//
+		// To avoid this, we use a non-forceful disconnect
+		// until this is fixed upstream.
+		//
+		// See
+		// https://bugreports.qt.io/browse/QTBUG-53906
+		// https://github.com/mumble-voip/mumble/issues/2334
+#if QT_VERSION >= 0x050000
+		u->disconnectSocket();
+#else
 		u->disconnectSocket(true);
+#endif
+	}
 }
 
 void Server::connectionClosed(QAbstractSocket::SocketError err, const QString &reason) {
@@ -1335,7 +1398,7 @@ void Server::connectionClosed(QAbstractSocket::SocketError err, const QString &r
 	Channel *old = u->cChannel;
 
 	{
-		QWriteLocker wl(&qrwlUsers);
+		QWriteLocker wl(&qrwlVoiceThread);
 
 		qhUsers.remove(u->uiSession);
 		qhHostUsers[u->haAddress].remove(u);
@@ -1379,9 +1442,9 @@ void Server::message(unsigned int uiType, const QByteArray &qbaMsg, ServerUser *
 		if (l < 2)
 			return;
 
-		QReadLocker rl(&qrwlUsers);
+		QReadLocker rl(&qrwlVoiceThread);
 
-		u->bUdp = false;
+		u->aiUdpFlag = 0;
 
 		const char *buffer = qbaMsg.constData();
 
@@ -1435,14 +1498,14 @@ void Server::message(unsigned int uiType, const QByteArray &qbaMsg, ServerUser *
 void Server::checkTimeout() {
 	QList<ServerUser *> qlClose;
 
-	qrwlUsers.lockForRead();
+	qrwlVoiceThread.lockForRead();
 	foreach(ServerUser *u, qhUsers) {
 		if (u->activityTime() > (iTimeout * 1000)) {
 			log(u, "Timeout");
 			qlClose.append(u);
 		}
 	}
-	qrwlUsers.unlock();
+	qrwlVoiceThread.unlock();
 	foreach(ServerUser *u, qlClose)
 		u->disconnectSocket(true);
 }
@@ -1503,14 +1566,20 @@ void Server::removeChannel(Channel *chan, Channel *dest) {
 	if (dest == NULL)
 		dest = chan->cParent;
 
-	chan->unlink(NULL);
+	{
+		QWriteLocker wl(&qrwlVoiceThread);
+		chan->unlink(NULL);
+	}
 
 	foreach(c, chan->qlChannels) {
 		removeChannel(c, dest);
 	}
 
 	foreach(p, chan->qlUsers) {
-		chan->removeUser(p);
+		{
+			QWriteLocker wl(&qrwlVoiceThread);
+			chan->removeUser(p);
+		}
 
 		Channel *target = dest;
 		while (target->cParent && ! hasPermission(static_cast<ServerUser *>(p), target, ChanACL::Enter))
@@ -1532,7 +1601,7 @@ void Server::removeChannel(Channel *chan, Channel *dest) {
 	emit channelRemoved(chan);
 
 	if (chan->cParent) {
-		QWriteLocker wl(&qrwlUsers);
+		QWriteLocker wl(&qrwlVoiceThread);
 		chan->cParent->removeChannel(chan);
 	}
 
@@ -1588,7 +1657,7 @@ void Server::userEnterChannel(User *p, Channel *c, MumbleProto::UserState &mpus)
 	Channel *old = p->cChannel;
 
 	{
-		QWriteLocker wl(&qrwlUsers);
+		QWriteLocker wl(&qrwlVoiceThread);
 		c->addUser(p);
 
 		bool mayspeak = ChanACL::hasPermission(static_cast<ServerUser *>(p), c, ChanACL::Speak, NULL);
@@ -1718,7 +1787,7 @@ void Server::clearACLCache(User *p) {
 	}
 
 	{
-		QWriteLocker lock(&qrwlUsers);
+		QWriteLocker lock(&qrwlVoiceThread);
 
 		foreach(ServerUser *u, qhUsers)
 			u->qmTargetCache.clear();
@@ -1855,29 +1924,11 @@ bool Server::isTextAllowed(QString &text, bool &changed) {
 	changed = false;
 
 	if (! bAllowHTML) {
-		if (! text.contains(QLatin1Char('<'))) {
-			text = text.simplified();
-		} else {
-			QXmlStreamReader qxsr(QString::fromLatin1("<document>%1</document>").arg(text));
-			QString qs;
-			while (! qxsr.atEnd()) {
-				switch (qxsr.readNext()) {
-					case QXmlStreamReader::Invalid:
-						return false;
-					case QXmlStreamReader::Characters:
-						qs += qxsr.text();
-						break;
-					case QXmlStreamReader::EndElement:
-						if ((qxsr.name() == QLatin1String("br")) || (qxsr.name() == QLatin1String("p")))
-							qs += "\n";
-						break;
-					default:
-						break;
-				}
-			}
-			text = qs.simplified();
+		QString out;
+		if (HTMLFilter::filter(text, out)) {
+			changed = true;
+			text = out;
 		}
-		changed = true;
 		return ((iMaxTextMessageLength == 0) || (text.length() <= iMaxTextMessageLength));
 	} else {
 		int length = text.length();

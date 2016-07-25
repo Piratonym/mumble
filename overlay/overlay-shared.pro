@@ -1,3 +1,8 @@
+# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Use of this source code is governed by a BSD-style license
+# that can be found in the LICENSE file at the root of the
+# Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
 include (../compiler.pri)
 
 VERSION = 1.3.0
@@ -45,7 +50,7 @@ CONFIG(debug, debug|release) {
 
 # Override fxc binary for the x86 build.
 CONFIG(force-x86-toolchain) {
-  FXC = "\"$$(DXSDK_DIR)\Utilities\bin\x86\fxc.exe\""
+  FXC = "\"$$(DXSDK_DIR)\\Utilities\\bin\\x86\\fxc.exe\""
 } else {
   FXC = fxc.exe
 }

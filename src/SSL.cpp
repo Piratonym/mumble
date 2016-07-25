@@ -1,38 +1,97 @@
-/* Copyright (C) 2005-2011, Thorvald Natvig <thorvald@natvig.com>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "murmur_pch.h"
+
+// Needed for MumbleSSL::qsslSanityCheck()
+#ifdef Q_OS_LINUX
+# include <dlfcn.h>
+# include <link.h>
+#endif
 
 #include "SSL.h"
 
 #include "Version.h"
+
+void MumbleSSL::initialize() {
+	// Let Qt initialize OpenSSL...
+	QSslSocket::supportsSsl();
+
+	// Check that we aren't in a situation where
+	// Qt has dynamically loaded *another*
+	// version/soname of libssl and/or libcrypto
+	// alongside the copy we link against ourselves.
+	//
+	// This can happen when Qt is built without the
+	// -openssl-linked configure option. When Qt is
+	// built without -openssl-linked, it will try
+	// to dynamically load the OpenSSL libraries.
+	// When Qt dynamically loads OpenSSL and there
+	// are multiple version of libcrypto and libssl
+	// available on the system, it is possible for
+	// Qt to load another version of OpenSSL in
+	// addition to the one our binary is linked
+	// against. Typically, this will happen if
+	// Mumble or Murmur are linked against
+	// an older version, and a newer version is
+	// available on the system as well.
+	//
+	// If we're in a situation where two version of
+	// OpenSSL's libraries are loaded into our process,
+	// we abort immediately. Things WILL go wrong.
+	MumbleSSL::qsslSanityCheck();
+}
+
+// Check that we haven't loaded multiple copies of OpenSSL
+// into our process by accident.
+void MumbleSSL::qsslSanityCheck() {
+#ifdef Q_OS_LINUX
+	struct link_map *lm = NULL;
+	void *self = dlopen(NULL, RTLD_NOW);
+	if (self == NULL) {
+		qFatal("SSL: could not dlopen program binary");
+	}
+
+	if (dlinfo(self, RTLD_DI_LINKMAP, &lm) == -1) {
+		qFatal("SSL: unable to acquire link_map: %s", dlerror());
+	}
+	if (lm == NULL) {
+		qFatal("SSL: link_map is NULL");
+	}
+
+	QStringList libssl;
+	QStringList libcrypto;
+
+	while (lm != NULL) {
+		QString name = QString::fromLocal8Bit(lm->l_name);
+		if (name.contains(QLatin1String("libssl"))) {
+			libssl << name;
+		} else if (name.contains(QLatin1String("libcrypto"))) {
+			libcrypto << name;
+		}
+		lm = lm->l_next;
+	}
+
+	bool ok = true;
+	if (libcrypto.size() == 0 || libssl.size() == 0) {
+		qFatal("SSL library query failed: %i libcrypto's and %i libssl's found.", libcrypto.size(), libssl.size());
+	}
+	if (libssl.size() > 1) {
+		qCritical("Found multiple libssl.so copies in binary: %s", qPrintable(libssl.join(QLatin1String(", "))));
+		ok = false;
+	}
+	if (libcrypto.size() > 1) {
+		qCritical("Found multiple libcrypto.so copies in binary: %s", qPrintable(libcrypto.join(QLatin1String(", "))));
+		ok = false;
+	}
+
+	if (!ok) {
+		qFatal("Aborting due to previous errors");
+	}
+#endif
+}
 
 QString MumbleSSL::defaultOpenSSLCipherString() {
 	return QLatin1String("EECDH+AESGCM:EDH+aRSA+AESGCM:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES256-SHA:AES128-SHA");

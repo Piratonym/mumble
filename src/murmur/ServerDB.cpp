@@ -1,32 +1,7 @@
-/* Copyright (C) 2005-2011, Thorvald Natvig <thorvald@natvig.com>
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
-
-   - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-   - Neither the name of the Mumble Developers nor the names of its
-     contributors may be used to endorse or promote products derived from this
-     software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "murmur_pch.h"
 
@@ -1153,8 +1128,33 @@ bool Server::setTexture(int id, const QByteArray &texture) {
 	return true;
 }
 
+void ServerDB::writeSUPW(int srvnum, const QString &pwHash, const QString &saltHash, const QVariant &kdfIterations) {
+        TransactionHolder th;
+        QSqlQuery &query = *th.qsqQuery;
+
+        SQLPREP("SELECT `user_id` FROM `%1users` WHERE `server_id` = ? AND `user_id` = ?");
+        query.addBindValue(srvnum);
+        query.addBindValue(0);
+        SQLEXEC();
+        if (! query.next()) {
+                SQLPREP("INSERT INTO `%1users` (`server_id`, `user_id`, `name`) VALUES (?, ?, ?)");
+                query.addBindValue(srvnum);
+                query.addBindValue(0);
+                query.addBindValue(QLatin1String("SuperUser"));
+                SQLEXEC();
+        }
+
+        SQLPREP("UPDATE `%1users` SET `pw`=?, `salt`=?, `kdfiterations`=? WHERE `server_id` = ? AND `user_id`=?");
+        query.addBindValue(pwHash);
+        query.addBindValue(saltHash);
+        query.addBindValue(kdfIterations);
+        query.addBindValue(srvnum);
+        query.addBindValue(0);
+        SQLEXEC();
+}
+
+
 void ServerDB::setSUPW(int srvnum, const QString &pw) {
-	TransactionHolder th;
 	QString pwHash, saltHash;
 
 	if (!Meta::mp.legacyPasswordHash) {
@@ -1164,27 +1164,11 @@ void ServerDB::setSUPW(int srvnum, const QString &pw) {
 		pwHash = getLegacySHA1Hash(pw);
 	}
 
-	QSqlQuery &query = *th.qsqQuery;
+	writeSUPW(srvnum, pwHash, saltHash, Meta::mp.kdfIterations);
+}
 
-	SQLPREP("SELECT `user_id` FROM `%1users` WHERE `server_id` = ? AND `user_id` = ?");
-	query.addBindValue(srvnum);
-	query.addBindValue(0);
-	SQLEXEC();
-	if (! query.next()) {
-		SQLPREP("INSERT INTO `%1users` (`server_id`, `user_id`, `name`) VALUES (?, ?, ?)");
-		query.addBindValue(srvnum);
-		query.addBindValue(0);
-		query.addBindValue(QLatin1String("SuperUser"));
-		SQLEXEC();
-	}
-
-	SQLPREP("UPDATE `%1users` SET `pw`=?, `salt`=?, `kdfiterations`=? WHERE `server_id` = ? AND `user_id`=?");
-	query.addBindValue(pwHash);
-	query.addBindValue(saltHash);
-	query.addBindValue(Meta::mp.kdfIterations);
-	query.addBindValue(srvnum);
-	query.addBindValue(0);
-	SQLEXEC();
+void ServerDB::disableSU(int srvnum) {
+        writeSUPW(srvnum, QString(), QString(), QVariant()); // NULL, NULL, NULL
 }
 
 QString ServerDB::getLegacySHA1Hash(const QString &password) {
@@ -1271,7 +1255,10 @@ QByteArray Server::getUserTexture(int id) {
 }
 
 void Server::addLink(Channel *c, Channel *l) {
-	c->link(l);
+	{
+		QWriteLocker wl(&qrwlVoiceThread);
+		c->link(l);
+	}
 
 	if (c->bTemporary || l->bTemporary)
 		return;
@@ -1291,7 +1278,10 @@ void Server::addLink(Channel *c, Channel *l) {
 }
 
 void Server::removeLink(Channel *c, Channel *l) {
-	c->unlink(l);
+	{
+		QWriteLocker wl(&qrwlVoiceThread);
+		c->unlink(l);
+	}
 
 	if (c->bTemporary || l->bTemporary)
 		return;
@@ -1592,8 +1582,10 @@ void Server::readLinks() {
 
 		Channel *c = qhChannels.value(cid);
 		Channel *l = qhChannels.value(lid);
-		if (c && l)
+		if (c && l) {
+			QWriteLocker wl(&qrwlVoiceThread);
 			c->link(l);
+		}
 	}
 }
 
