@@ -76,7 +76,7 @@ bool Channel::isAlwaysVisibleWhenFiltering() const {
 		return true;
 	}
 	
-	foreach (Channel* channel, qlChannels) {
+	foreach (Channel *channel, qlChannels) {
 		if (channel->isAlwaysVisibleWhenFiltering()) {
 			return true;
 		}
@@ -86,9 +86,9 @@ bool Channel::isAlwaysVisibleWhenFiltering() const {
 }
 
 bool Channel::isNeverVisibleWhenFiltering() const {
-	const Channel* channel = this;
-	while(channel != NULL) {
-		if(channel->filteredVisibility == Channel::FILTERED_VISIBILITY_NEVER) {
+	const Channel *channel = this;
+	while (channel != NULL) {
+		if (channel->filteredVisibility == Channel::FILTERED_VISIBILITY_NEVER) {
 			return true;
 		}
 		channel = channel->cParent;
@@ -99,11 +99,11 @@ bool Channel::isNeverVisibleWhenFiltering() const {
 #endif // MUMBLE
 
 bool Channel::hasAnyUsersInOrBelow() const {
-	if(!qlUsers.isEmpty()) {
+	if (!qlUsers.isEmpty()) {
 		return true;
 	}
 	
-	foreach (const Channel* channel, qlChannels) {
+	foreach (const Channel *channel, qlChannels) {
 		if (channel->hasAnyUsersInOrBelow()) {
 			return true;
 		}
@@ -237,7 +237,7 @@ size_t Channel::getLevel() const {
 }
 
 size_t Channel::getDepth() const {
-	if(qlChannels.empty()) {
+	if (qlChannels.empty()) {
 		return 0;
 	}
 

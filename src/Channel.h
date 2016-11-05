@@ -87,7 +87,7 @@ class Channel : public QObject {
 #endif // MUMBLE
 		
 		bool hasAnyUsersInOrBelow() const;
-		bool isUserInOrBelow(const User* user) const;
+		bool isUserInOrBelow(const User *user) const;
 		
 		static bool lessThan(const Channel *, const Channel *);
 

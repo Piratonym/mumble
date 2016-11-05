@@ -429,11 +429,11 @@ QVariant UserModel::data(const QModelIndex &idx, int role) const {
 				if (! c->qbaDescHash.isEmpty())
 					l << (item->bCommentSeen ? qiCommentSeen : qiComment);
 
-				if (c->filteredVisibility == Channel::FILTERED_VISIBILITY_NEVER)
+				if (c->filteredVisibility == Channel::FILTERED_VISIBILITY_NEVER) {
 					l << (qiFilterVisibilityNever);
-				else if (c->filteredVisibility == Channel::FILTERED_VISIBILITY_ALWAYS)
+				} else if (c->filteredVisibility == Channel::FILTERED_VISIBILITY_ALWAYS) {
 					l << (qiFilterVisibilityAlways);
-
+				}
 				return l;
 			case Qt::FontRole:
 				if (g.uiSession) {
@@ -1515,4 +1515,3 @@ void UserModel::updateOverlay() const {
 	g.o->updateOverlay();
 	g.lcd->updateUserView();
 }
-

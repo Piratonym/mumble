@@ -1906,7 +1906,7 @@ void MainWindow::qmChannel_aboutToShow() {
 	qmChannel->addAction(qaChannelSendMessage);
 
 	// hiding the root is nonsense
-	if(c && c->cParent) {
+	if (c && c->cParent) {
 		qmChannel->addSeparator();
 		QMenu *filter = qmChannel->addMenu(tr("When filtered..."));
 		filter->addAction(qaChannelFilterVisibilityNormal);
@@ -1954,18 +1954,18 @@ void MainWindow::qmChannel_aboutToShow() {
 		}
 	}
 
-	if(c) {
+	if (c) {
 		switch (c->filteredVisibility) {
-		case Channel::FILTERED_VISIBILITY_ALWAYS:
-			qaChannelFilterVisibilityAlways->setChecked(true);
-			break;
-		case Channel::FILTERED_VISIBILITY_NEVER:
-			qaChannelFilterVisibilityNever->setChecked(true);
-			break;
-		case Channel::FILTERED_VISIBILITY_NORMAL:
-		default:
-			qaChannelFilterVisibilityNormal->setChecked(true);
-			break;
+			case Channel::FILTERED_VISIBILITY_ALWAYS:
+				qaChannelFilterVisibilityAlways->setChecked(true);
+				break;
+			case Channel::FILTERED_VISIBILITY_NEVER:
+				qaChannelFilterVisibilityNever->setChecked(true);
+				break;
+			case Channel::FILTERED_VISIBILITY_NORMAL:
+			default:
+				qaChannelFilterVisibilityNormal->setChecked(true);
+				break;
 		}
 	}
 

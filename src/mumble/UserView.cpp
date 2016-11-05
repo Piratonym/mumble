@@ -170,9 +170,9 @@ void UserView::mouseReleaseEvent(QMouseEvent *evt) {
 		} else if (channel && !channel->qbaDescHash.isEmpty()) {
 			hasComment = true;
 
-			if (channel->filteredVisibility != Channel::FILTERED_VISIBILITY_NORMAL)
+			if (channel->filteredVisibility != Channel::FILTERED_VISIBILITY_NORMAL) {
 				commentFlagPxOffset -= UserDelegate::FLAG_DIMENSION;
-
+			}
 		}
 
 		if (hasComment) {
@@ -287,12 +287,12 @@ void UserView::selectSearchResult() {
 	qpmiSearch = QPersistentModelIndex();
 }
 
-static bool isSessionUserInOrBelowChannel(const Channel* channel) {
+static bool isSessionUserInOrBelowChannel(const Channel *channel) {
 	if (g.uiSession == 0) {
 		return false;
 	}
 	
-	const ClientUser* user = ClientUser::get(g.uiSession);
+	const ClientUser *user = ClientUser::get(g.uiSession);
 	if (user == NULL) {
 		return false;
 	}
@@ -301,7 +301,7 @@ static bool isSessionUserInOrBelowChannel(const Channel* channel) {
 }
 
 bool isChannelFiltered(const Channel *c) {
-	if(!g.s.bFilterActive) {
+	if (!g.s.bFilterActive) {
 		return false;
 	}
 	
@@ -319,7 +319,7 @@ bool isChannelFiltered(const Channel *c) {
 void UserView::updateChannel(const QModelIndex &idx) {
 	UserModel *um = static_cast<UserModel *>(model());
 
-	if(!idx.isValid())
+	if (!idx.isValid())
 		return;
 
 	Channel * c = um->getChannel(idx);
@@ -329,7 +329,7 @@ void UserView::updateChannel(const QModelIndex &idx) {
 		updateChannel(idx.child(i,0));
 	}
 
-	if(c && idx.parent().isValid()) {
+	if (c && idx.parent().isValid()) {
 		setRowHidden(idx.row(), idx.parent(), isChannelFiltered(c));
 	}
 }

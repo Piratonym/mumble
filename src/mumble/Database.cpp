@@ -300,11 +300,11 @@ Channel::FilteredVisibility Database::getChannelFilteredVisibility(const QByteAr
 void Database::setChannelFilteredVisibility(const QByteArray &server_cert_digest, const int channel_id, Channel::FilteredVisibility visibility) {
 	QSqlQuery query;
 	
-	if (visibility != Channel::FILTERED_VISIBILITY_NORMAL)
+	if (visibility != Channel::FILTERED_VISIBILITY_NORMAL) {
 		query.prepare(QLatin1String("INSERT OR REPLACE INTO `filtered_channels` (`server_cert_digest`, `channel_id`, `visibility`) VALUES (?, ?, ?)"));
-	else
+	} else {
 		query.prepare(QLatin1String("DELETE FROM `filtered_channels` WHERE `server_cert_digest` = ? AND `channel_id` = ?"));
-
+	}
 	query.addBindValue(server_cert_digest);
 	query.addBindValue(channel_id);
 	if (visibility != Channel::FILTERED_VISIBILITY_NORMAL) {

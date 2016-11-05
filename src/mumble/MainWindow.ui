@@ -820,7 +820,7 @@ the channel's context menu.</string>
     <string>&amp;Never show channel</string>
    </property>
    <property name="toolTip">
-    <string>When filtering hide channel. Even if it is not empty.</string>
+    <string>When the channel filter is enabled, hide this channel. Even if it is not empty.</string>
    </property>
   </action>
   <action name="qaUserCommentView">
@@ -898,18 +898,7 @@ the channel's context menu.</string>
     <string>&amp;Always show channel</string>
    </property>
    <property name="toolTip">
-    <string>Always show channel when filtering. Even if it is empty.</string>
-   </property>
-  </action>
-  <action name="action_Hide_channel">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Hide channel if empty</string>
-   </property>
-   <property name="toolTip">
-    <string>When filtering channel gets hidden unless it contains users.</string>
+    <string>When the channel filter is enabled, show this channel. Even if it is empty.</string>
    </property>
   </action>
   <action name="qaChannelFilterVisibilityNormal">
@@ -920,7 +909,7 @@ the channel's context menu.</string>
     <string>&amp;Default</string>
    </property>
    <property name="toolTip">
-    <string>Apply channel default behavior.</string>
+    <string>Do not apply any special channel filtering rules to this channel.</string>
    </property>
   </action>
  </widget>
