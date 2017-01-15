@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -23,6 +23,22 @@
 #include "Version.h"
 
 #if defined(Q_OS_WIN)
+// regString converts a wchar_t string of size to a
+// QString. If the string contains a NUL value, that
+// NUL value will terminate the string.
+static QString regString(wchar_t *string, int size) {
+	if (size <= 0) {
+		return QString();
+	}
+	// If string contains a NUL, adjust the size such
+	// that the NUL is not included in the returned
+	// string.
+	const size_t adjustedSize = wcsnlen(string, static_cast<size_t>(size));
+	// The return value of wcsnlen is <= size which is
+	// an int, so casting adjustedSize to int is safe.
+	return QString::fromWCharArray(string, static_cast<int>(adjustedSize));
+}
+
 /// Query for a Windows 10-style displayable version.
 ///
 /// This returns a string of the kind:
@@ -67,7 +83,7 @@ static QString win10DisplayableVersion() {
 		RegCloseKey(key);
 		return QString();
 	}
-	productName = QString::fromWCharArray(buf, static_cast<int>(len / sizeof(buf[0])));
+	productName = regString(buf, static_cast<int>(len / sizeof(buf[0])));
 
 	len = sizeof(buf);
 	err = RegQueryValueEx(key, L"ReleaseId", NULL, NULL, reinterpret_cast<LPBYTE>(&buf[0]), &len);
@@ -75,7 +91,7 @@ static QString win10DisplayableVersion() {
 		RegCloseKey(key);
 		return QString();
 	}
-	releaseId = QString::fromWCharArray(buf, static_cast<int>(len / sizeof(buf[0])));
+	releaseId = regString(buf, static_cast<int>(len / sizeof(buf[0])));
 
 	len = sizeof(buf);
 	err = RegQueryValueEx(key, L"CurrentBuild", NULL, NULL, reinterpret_cast<LPBYTE>(&buf[0]), &len);
@@ -83,7 +99,7 @@ static QString win10DisplayableVersion() {
 		RegCloseKey(key);
 		return QString();
 	}
-	currentBuild = QString::fromWCharArray(buf, static_cast<int>(len / sizeof(buf[0])));
+	currentBuild = regString(buf, static_cast<int>(len / sizeof(buf[0])));
 
 	len = sizeof(dw);
 	err = RegQueryValueEx(key, L"UBR", NULL, NULL, reinterpret_cast<LPBYTE>(&dw), &len);

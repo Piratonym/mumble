@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -8,6 +8,10 @@
 
 #include <QApplication>
 #include <QUrl>
+
+#if QT_VERSION >= 0x050000 && defined(Q_OS_WIN)
+# include <QAbstractNativeEventFilter>
+#endif
 
 /**
  * @brief Implements custom system shutdown behavior as well as event filtering.

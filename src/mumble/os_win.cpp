@@ -1,13 +1,9 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 #include "mumble_pch.hpp"
-
-#if QT_VERSION >= 0x050000
-# include <qpa/qplatformnativeinterface.h>
-#endif
 
 #include <windows.h>
 #include <tlhelp32.h>
@@ -17,6 +13,7 @@
 
 #include "Global.h"
 #include "Version.h"
+#include "LogEmitter.h"
 
 extern "C" {
 	void __cpuid(int a[4], int b);
@@ -31,10 +28,14 @@ static FILE *fConsole = NULL;
 static wchar_t wcComment[PATH_MAX] = L"";
 static MINIDUMP_USER_STREAM musComment;
 
+static QSharedPointer<LogEmitter> le;
+
 static int cpuinfo[4];
 
 bool bIsWin7 = false;
 bool bIsVistaSP1 = false;
+
+HWND mumble_mw_hwnd = 0;
 
 static void mumbleMessageOutputQString(QtMsgType type, const QString &msg) {
 	char c;
@@ -51,9 +52,12 @@ static void mumbleMessageOutputQString(QtMsgType type, const QString &msg) {
 		default:
 			c='X';
 	}
-	fprintf(fConsole, "<%c>%s %s\n", c, qPrintable(QDateTime::currentDateTime().toString(QLatin1String("yyyy-MM-dd hh:mm:ss.zzz"))), qPrintable(msg));
+	QString date = QDateTime::currentDateTime().toString(QLatin1String("yyyy-MM-dd hh:mm:ss.zzz"));
+	QString fmsg = QString::fromLatin1("<%1>%2 %3").arg(c).arg(date).arg(msg);
+	fprintf(fConsole, "%s\n", qPrintable(fmsg));
 	fflush(fConsole);
-	OutputDebugStringA(qPrintable(msg));
+	OutputDebugStringA(qPrintable(fmsg));
+	le->addLogEntry(fmsg);
 	if (type == QtFatalMsg) {
 		::MessageBoxA(NULL, qPrintable(msg), "Mumble", MB_OK | MB_ICONERROR);
 		exit(0);
@@ -196,8 +200,9 @@ FARPROC WINAPI delayHook(unsigned dliNotify, PDelayLoadInfo pdli) {
 	return 0;
 }
 
+decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = delayHook;
+
 void os_init() {
-	__pfnDliNotifyHook2 = delayHook;
 	__cpuid(cpuinfo, 1);
 
 #define MMXSSE 0x02800000
@@ -231,6 +236,11 @@ void os_init() {
 	SetHeapOptions();
 	enableCrashOnCrashes();
 	mumble_speex_init();
+
+	// Make a copy of the global LogEmitter, such that
+	// os_win.cpp doesn't have to consider the deletion
+	// of the Global object and its LogEmitter object.
+	le = g.le;
 
 #ifdef QT_NO_DEBUG
 	QString console = g.qdBasePath.filePath(QLatin1String("Console.txt"));
@@ -311,22 +321,4 @@ DWORD WinVerifySslCert(const QByteArray& cert) {
 	CertFreeCertificateContext(certContext);
 
 	return errorStatus;
-}
-
-HWND MumbleHWNDForQWidget(QWidget *widget) {
-#if QT_VERSION >= 0x050000
-	QWindow *window = widget->windowHandle();
-	if (window == NULL) {
-		QWidget *npw = widget->nativeParentWidget();
-		if (npw != NULL) {
-			window = npw->windowHandle();
-		}
-	}
-	if (window != NULL && window->handle() != 0) {
-		return static_cast<HWND>(qApp->platformNativeInterface()->nativeResourceForWindow("handle", window));
-	}
-	return 0;
-#else
-	return widget->winId();
-#endif
 }

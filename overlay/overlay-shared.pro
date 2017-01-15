@@ -1,4 +1,4 @@
-# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Copyright 2005-2017 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -29,7 +29,7 @@ QMAKE_CXXFLAGS_RELEASE	*= -MT
 QMAKE_CXXFLAGS_DEBUG	*= -MTd
 
 LIBS *= -ldxguid -luuid -lole32 -luser32 -ladvapi32
-LIBS *= -ld3d9 -ld3d10 -ld3d11 -ld3dcompiler -ld3dx9 -ld3dx10 -ld3dx11 -ldxgi
+LIBS *= -ld3d9 -ld3d10 -ld3d11 -ld3dcompiler -ldxgi
 
 CONFIG(force-x86_64-toolchain) {
   DEFINES += USE_MINHOOK
@@ -39,18 +39,22 @@ CONFIG(force-x86_64-toolchain) {
 
 CONFIG(release, debug|release) {
   DESTDIR = ../release
-  QMAKE_LIBDIR += ../release
+  QMAKE_LIBDIR = ../release $$QMAKE_LIBDIR
 }
 
 CONFIG(debug, debug|release) {
   DESTDIR = ../debug
-  QMAKE_LIBDIR += ../debug
+  QMAKE_LIBDIR = ../debug $$QMAKE_LIBDIR
   DEFINES *= DEBUG
 }
 
 # Override fxc binary for the x86 build.
 CONFIG(force-x86-toolchain) {
-  FXC = "\"$$(DXSDK_DIR)\\Utilities\\bin\\x86\\fxc.exe\""
+  exists($$DXSDK_DIR) {
+    FXC = "\"$$(DXSDK_DIR)\\Utilities\\bin\\x86\\fxc.exe\""
+  } else {
+    FXC = fxc.exe
+  }
 } else {
   FXC = fxc.exe
 }

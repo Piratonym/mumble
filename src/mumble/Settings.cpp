@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -249,6 +249,8 @@ Settings::Settings() {
 	fVADmin = 0.80f;
 	fVADmax = 0.98f;
 
+	bUseOpusMusicEncoding = false;
+
 	bTxAudioCue = false;
 	qsTxAudioCueOn = cqsDefaultPushClickOn;
 	qsTxAudioCueOff = cqsDefaultPushClickOff;
@@ -277,6 +279,7 @@ Settings::Settings() {
 
 	ceExpand = ChannelsWithUsers;
 	ceChannelDrag = Ask;
+	ceUserDrag = Move;
 	bMinimalView = false;
 	bHideFrame = false;
 	aotbAlwaysOnTop = OnTopNever;
@@ -342,6 +345,8 @@ Settings::Settings() {
 	bAutoConnect = false;
 	ptProxyType = NoProxy;
 	usProxyPort = 0;
+	iMaxInFlightTCPPings = 2;
+	bUdpForceTcpAddr = true;
 
 	iMaxImageSize = ciDefaultMaxImageSize;
 	iMaxImageWidth = 1024; // Allow 1024x1024 resolution
@@ -472,6 +477,29 @@ BOOST_TYPEOF_REGISTER_TEMPLATE(QList, 1)
 #define LOADENUM(var, name) var = static_cast<BOOST_TYPEOF(var)>(settings_ptr->value(QLatin1String(name), var).toInt())
 #define LOADFLAG(var, name) var = static_cast<BOOST_TYPEOF(var)>(settings_ptr->value(QLatin1String(name), static_cast<int>(var)).toInt())
 
+// Workaround for mumble-voip/mumble#2638.
+//
+// Qt previously expected to be able to write
+// NUL bytes in strings in plists. This is no
+// longer possible, which causes Qt to write
+// incomplete stings to the preferences plist.
+// These are of the form "@Variant(", and, for
+// Mumble, typically happen for float values.
+//
+// We detect this bad value and avoid loading
+// it. This causes such settings to fall back
+// to their defaults, instead of being set to
+// a zero value.
+#ifdef Q_OS_MAC
+ #undef SAVELOAD
+ #define SAVELOAD(var, name) \
+	do { \
+		if (settings_ptr->value(QLatin1String(name)).toString() != QLatin1String("@Variant(")) { \
+			var = qvariant_cast<BOOST_TYPEOF(var)>(settings_ptr->value(QLatin1String(name), var)); \
+		} \
+	} while (0)
+#endif
+
 void OverlaySettings::load() {
 	load(g.qs);
 }
@@ -590,6 +618,8 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bWhisperFriends, "audio/whisperfriends");
 	SAVELOAD(bTransmitPosition, "audio/postransmit");
 
+	SAVELOAD(bUseOpusMusicEncoding, "codec/opus/encoder/music");
+
 	SAVELOAD(iJitterBufferSize, "net/jitterbuffer");
 	SAVELOAD(iFramesPerPacket, "net/framesperpacket");
 
@@ -640,6 +670,8 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(iMaxImageWidth, "net/maximagewidth");
 	SAVELOAD(iMaxImageHeight, "net/maximageheight");
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
+	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
+	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
@@ -650,6 +682,7 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(themeStyleName, "ui/themestyle");
 	LOADENUM(ceExpand, "ui/expand");
 	LOADENUM(ceChannelDrag, "ui/drag");
+	LOADENUM(ceUserDrag, "ui/userdrag");
 	LOADENUM(aotbAlwaysOnTop, "ui/alwaysontop");
 	SAVELOAD(bAskOnQuit, "ui/askonquit");
 	SAVELOAD(bMinimalView, "ui/minimalview");
@@ -901,6 +934,8 @@ void Settings::save() {
 	SAVELOAD(bWhisperFriends, "audio/whisperfriends");
 	SAVELOAD(bTransmitPosition, "audio/postransmit");
 
+	SAVELOAD(bUseOpusMusicEncoding, "codec/opus/encoder/music");
+
 	SAVELOAD(iJitterBufferSize, "net/jitterbuffer");
 	SAVELOAD(iFramesPerPacket, "net/framesperpacket");
 
@@ -950,6 +985,8 @@ void Settings::save() {
 	SAVELOAD(iMaxImageWidth, "net/maximagewidth");
 	SAVELOAD(iMaxImageHeight, "net/maximageheight");
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
+	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
+	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
@@ -960,6 +997,7 @@ void Settings::save() {
 	SAVELOAD(themeStyleName, "ui/themestyle");
 	SAVELOAD(ceExpand, "ui/expand");
 	SAVELOAD(ceChannelDrag, "ui/drag");
+	SAVELOAD(ceUserDrag, "ui/userdrag");
 	SAVELOAD(aotbAlwaysOnTop, "ui/alwaysontop");
 	SAVELOAD(bAskOnQuit, "ui/askonquit");
 	SAVELOAD(bMinimalView, "ui/minimalview");

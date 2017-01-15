@@ -1,9 +1,9 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-#include "../mumble_plugin_win32_x86.h"
+#include "../mumble_plugin_win32_32bit.h"
 
 static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, float *camera_pos, float *camera_front, float *camera_top, std::string &, std::wstring &) {
 	for (int i=0;i<3;i++)
@@ -13,7 +13,7 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	bool ok;
 
 	// Avatar pointers
-	procptr32_t avatar_base = peekProc<procptr32_t>(pModule + 0x016FD5B4);
+	procptr32_t avatar_base = peekProc<procptr32_t>(pModule + 0x1733C5C);
 	if (!avatar_base) return false;
 	procptr32_t avatar_offset_0 = peekProc<procptr32_t>(avatar_base + 0x448);
 	if (!avatar_offset_0) return false;
@@ -26,10 +26,10 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 
 	// Peekproc and assign game addresses to our containers, so we can retrieve positional data
 	ok = peekProc(avatar_offset + 0x0, avatar_pos, 12) && // Avatar Position values (X, Y and Z).
-			peekProc(pModule + 0x016FD7F0, camera_pos, 12) && // Camera Position values (X, Y and Z).
+			peekProc(pModule + 0x1733E98, camera_pos, 12) && // Camera Position values (X, Y and Z).
 			peekProc(avatar_offset + 0xC, avatar_front, 12) && // Avatar Front values (X, Y and Z).
-			peekProc(pModule + 0x016FD7D8, camera_front, 12) && // Camera Front Vector values (X, Y and Z).
-			peekProc(pModule + 0x016FD7E4, camera_top, 12); // Camera Top Vector values (X, Y and Z).
+			peekProc(pModule + 0x1733E80, camera_front, 12) && // Camera Front Vector values (X, Y and Z).
+			peekProc(pModule + 0x1733E8C, camera_top, 12); // Camera Top Vector values (X, Y and Z).
 
 	// This prevents the plugin from linking to the game in case something goes wrong during values retrieval from memory addresses.
 	if (! ok)
@@ -65,10 +65,10 @@ static int trylock(const std::multimap<std::wstring, unsigned long long int> &pi
 }
 
 static const std::wstring longdesc() {
-	return std::wstring(L"Supports Rocket League version 1.21 without context or identity support yet."); // Plugin long description
+	return std::wstring(L"Supports Rocket League version 1.27 without context or identity support yet."); // Plugin long description
 }
 
-static std::wstring description(L"Rocket League (v1.21)"); // Plugin short description
+static std::wstring description(L"Rocket League (v1.27)"); // Plugin short description
 static std::wstring shortname(L"Rocket League"); // Plugin short name
 
 static int trylock1() {
@@ -93,10 +93,10 @@ static MumblePlugin2 rlplug2 = {
 	trylock
 };
 
-extern "C" __declspec(dllexport) MumblePlugin *getMumblePlugin() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin *getMumblePlugin() {
 	return &rlplug;
 }
 
-extern "C" __declspec(dllexport) MumblePlugin2 *getMumblePlugin2() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin2 *getMumblePlugin2() {
 	return &rlplug2;
 }

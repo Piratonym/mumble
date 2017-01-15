@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -88,6 +88,7 @@ LoopUser::LoopUser() {
 	tsState = Settings::Passive;
 	cChannel = NULL;
 	qtTicker.start();
+	qtLastFetch.start();
 }
 
 void LoopUser::addFrame(const QByteArray &packet) {
@@ -199,15 +200,13 @@ void Audio::startOutput(const QString &output) {
 }
 
 void Audio::stopOutput() {
-	AudioOutputPtr ao = g.ao;
+	QWeakPointer<AudioOutput> weak_ao = g.ao.toWeakRef();
 
-	g.ao.reset();
+	g.ao.clear();
 
-	while (ao.get() && ! ao.unique()) {
+	while (weak_ao) {
 		QThread::yieldCurrentThread();
 	}
-
-	ao.reset();
 }
 
 void Audio::startInput(const QString &input) {
@@ -217,15 +216,13 @@ void Audio::startInput(const QString &input) {
 }
 
 void Audio::stopInput() {
-	AudioInputPtr ai = g.ai;
+	QWeakPointer<AudioInput> weak_ai = g.ai.toWeakRef();
 
-	g.ai.reset();
+	g.ai.clear();
 
-	while (ai.get() && ! ai.unique()) {
+	while (weak_ai) {
 		QThread::yieldCurrentThread();
 	}
-
-	ai.reset();
 }
 
 void Audio::start(const QString &input, const QString &output) {
@@ -234,16 +231,13 @@ void Audio::start(const QString &input, const QString &output) {
 }
 
 void Audio::stop() {
-	AudioInputPtr ai = g.ai;
-	AudioOutputPtr ao = g.ao;
+	QWeakPointer<AudioInput> weak_ai = g.ai.toWeakRef();
+	QWeakPointer<AudioOutput> weak_ao = g.ao.toWeakRef();
 
-	g.ao.reset();
-	g.ai.reset();
+	g.ao.clear();
+	g.ai.clear();
 
-	while ((ai.get() && ! ai.unique()) || (ao.get() && ! ao.unique())) {
+	while (weak_ai && weak_ao) {
 		QThread::yieldCurrentThread();
 	}
-
-	ai.reset();
-	ao.reset();
 }

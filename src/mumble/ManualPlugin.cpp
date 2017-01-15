@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -18,14 +18,6 @@
 #include "ui_ManualPlugin.h"
 
 #include <float.h>
-
-#ifdef Q_OS_UNIX
-#define __cdecl
-typedef WId HWND;
-#define DLL_PUBLIC __attribute__((visibility("default")))
-#else
-#define DLL_PUBLIC __declspec(dllexport)
-#endif
 
 #include "../../plugins/mumble_plugin.h"
 

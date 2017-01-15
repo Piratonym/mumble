@@ -1,10 +1,7 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
-
-#define __cdecl
-typedef unsigned long HWND;
 
 #include "../mumble_plugin.h"
 
@@ -21,7 +18,7 @@ typedef unsigned long HWND;
 #include <fcntl.h>
 #include <time.h>
 
-static std::wstring wsPluginName;
+static std::wstring wsPluginName(L"Link");
 static std::wstring wsDescription;
 static char memname[256];
 
@@ -198,6 +195,6 @@ static MumblePlugin linkplug = {
 	fetch
 };
 
-extern "C" __attribute__((visibility("default"))) MumblePlugin *getMumblePlugin() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin *getMumblePlugin() {
 	return &linkplug;
 }

@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -7,6 +7,9 @@
 #define MUMBLE_LIB_H_
 
 #define _UNICODE
+#ifdef _WIN32_WINNT
+# undef _WIN32_WINNT
+#endif
 #define  _WIN32_WINNT 0x0501
 #include <stdio.h>
 #include <stdarg.h>

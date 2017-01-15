@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -30,13 +30,6 @@
 #endif
 
 #define UDP_PACKET_SIZE 1024
-
-LogEmitter::LogEmitter(QObject *p) : QObject(p) {
-};
-
-void LogEmitter::addLogEntry(const QString &msg) {
-	emit newLogEntry(msg);
-};
 
 ExecEvent::ExecEvent(boost::function<void ()> f) : QEvent(static_cast<QEvent::Type>(EXEC_QEVENT)) {
 	func = f;
@@ -894,7 +887,7 @@ bool Server::checkDecrypt(ServerUser *u, const char *encrypt, char *plain, unsig
 }
 
 void Server::sendMessage(ServerUser *u, const char *data, int len, QByteArray &cache, bool force) {
-	if ((u->aiUdpFlag.load() == 1 || force) && (u->sUdpSocket != INVALID_SOCKET)) {
+	if ((QAtomicIntLoad(u->aiUdpFlag) == 1 || force) && (u->sUdpSocket != INVALID_SOCKET)) {
 #if defined(__LP64__)
 		STACKVAR(char, ebuffer, len+4+16);
 		char *buffer = reinterpret_cast<char *>(((reinterpret_cast<quint64>(ebuffer) + 8) & ~7) + 4);

@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -41,6 +41,7 @@ class ServerDB {
 		static int getLogLen(int server_id);
 		static void wipeLogs();
 		static bool prepare(QSqlQuery &, const QString &, bool fatal = true, bool warn = true);
+		static bool query(QSqlQuery &, const QString &, bool fatal = true, bool warn = true);
 		static bool exec(QSqlQuery &, const QString &str = QString(), bool fatal= true, bool warn = true);
 		static bool execBatch(QSqlQuery &, const QString &str = QString(), bool fatal= true);
 		// No copy; private declaration without implementation

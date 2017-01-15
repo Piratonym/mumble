@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -6,7 +6,6 @@
 #ifndef MUMBLE_MUMBLE_AUDIOINPUT_H_
 #define MUMBLE_MUMBLE_AUDIOINPUT_H_
 
-#include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 #include <speex/speex.h>
 #include <speex/speex_echo.h>
@@ -14,6 +13,7 @@
 #include <speex/speex_resampler.h>
 #include <QtCore/QObject>
 #include <QtCore/QThread>
+#include <QtCore/QSharedPointer>
 #include <vector>
 
 #include "Audio.h"
@@ -25,7 +25,7 @@ class AudioInput;
 class CELTCodec;
 struct CELTEncoder;
 struct OpusEncoder;
-typedef boost::shared_ptr<AudioInput> AudioInputPtr;
+typedef QSharedPointer<AudioInput> AudioInputPtr;
 
 class AudioInputRegistrar {
 	private:

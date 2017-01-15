@@ -1,9 +1,9 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-#include "../mumble_plugin_win32_x64.h" // Include standard plugin header.
+#include "../mumble_plugin_win32_64bit.h" // Include standard plugin header.
 #include "../mumble_plugin_utils.h" // Include plugin header for special functions, like "escape".
 #include <algorithm> // Include algorithm header for the game version detector
 
@@ -20,18 +20,18 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	memcmp(buf, strlit, std::min(sizeof(buf), sizeof(strlit)-1)) == 0
 
 	// Steam version
-	if (peekProc(pModule + 0x17C6330, game_name) && VERSION_EQ(game_name, "Grand Theft Auto V")) {
-		state_address = pModule + 0x268C370;
-		in_game_address = pModule + 0x1B76454;
-		avatar_pos_address = pModule + 0x1F05230;
-		camera_pos_address = pModule + 0x1C08080;
-		avatar_base_address = pModule + 0x1B463D0;
-		camera_front_address = pModule + 0x1C09B40;
-		camera_top_address = pModule + 0x1EDA440;
-		player_address = pModule + 0x2696B0C;
-		vehicle_address = pModule + 0x228DDC0;
-		location_address = pModule + 0x228D79B;
-		street_address = pModule + 0x228A550;
+	if (peekProc(pModule + 0x18064D8, game_name) && VERSION_EQ(game_name, "Grand Theft Auto V")) {
+		state_address = pModule + 0x272B9E0;
+		in_game_address = pModule + 0x2453730;
+		avatar_pos_address = pModule + 0x1F76F40;
+		camera_pos_address = pModule + 0x1F73840;
+		avatar_base_address = pModule + 0x1B8E670;
+		camera_front_address = pModule + 0x1F76130;
+		camera_top_address = pModule + 0x1F76120;
+		player_address = pModule + 0x273615C;
+		vehicle_address = pModule + 0x2329D00;
+		location_address = pModule + 0x23296CB;
+		street_address = pModule + 0x2326410;
 	// Retail version
 	} else if (peekProc(pModule + 0x17C3280, game_name) && VERSION_EQ(game_name, "Grand Theft Auto V")) {
 		state_address = pModule + 0x2688DB0;
@@ -95,7 +95,6 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	std::ostringstream ocontext;
 
 	// Host
-	host[sizeof(host)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
 	escape(host);
 	if (strcmp(host, "") != 0 && strstr(host, "127.0.0.1") == NULL) { // Set host string as empty if "127.0.0.1" is found in it.
 		ocontext << " {\"Host\": \"" << host << "\"}"; // Set context with IP address and port
@@ -109,8 +108,7 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	oidentity << "{";
 
 	// Player
-	player[sizeof(player)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-	escape(player);
+	escape(player, sizeof(player));
 	if (strcmp(player, "") != 0) {
 		oidentity << std::endl;
 		oidentity << "\"Player\": \"" << player << "\","; // Set player nickname in identity.
@@ -119,8 +117,7 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	}
 
 	// Vehicle
-	vehicle[sizeof(vehicle)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-	escape(vehicle);
+	escape(vehicle, sizeof(vehicle));
 	if (strcmp(vehicle, "") != 0) {
 		oidentity << std::endl;
 		oidentity << "\"Vehicle\": \"" << vehicle << "\","; // Set vehicle name in identity.
@@ -129,8 +126,7 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	}
 
 	// Location
-	location[sizeof(location)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-	escape(location);
+	escape(location, sizeof(location));
 	if (strcmp(location, "") != 0) {
 		oidentity << std::endl;
 		oidentity << "\"Location\": \"" << location << "\","; // Set location name in identity.
@@ -139,8 +135,7 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
 	}
 
 	// Street
-	street[sizeof(street)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-	escape(street);
+	escape(street, sizeof(street));
 	if (strcmp(street, "") != 0) {
 		oidentity << std::endl;
 		oidentity << "\"Street\": \"" << street << "\""; // Set street name in identity.
@@ -205,10 +200,10 @@ static int trylock(const std::multimap<std::wstring, unsigned long long int> &pi
 }
 
 static const std::wstring longdesc() {
-	return std::wstring(L"Supports Grand Theft Auto V version 1.35 with identity support."); // Plugin long description
+	return std::wstring(L"Supports Grand Theft Auto V version 1.37 with identity support."); // Plugin long description
 }
 
-static std::wstring description(L"Grand Theft Auto V (v1.35)"); // Plugin short description
+static std::wstring description(L"Grand Theft Auto V (v1.37)"); // Plugin short description
 static std::wstring shortname(L"Grand Theft Auto V"); // Plugin short name
 
 static int trylock1() {
@@ -233,10 +228,10 @@ static MumblePlugin2 gtavplug2 = {
 	trylock
 };
 
-extern "C" __declspec(dllexport) MumblePlugin *getMumblePlugin() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin *getMumblePlugin() {
 	return &gtavplug;
 }
 
-extern "C" __declspec(dllexport) MumblePlugin2 *getMumblePlugin2() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin2 *getMumblePlugin2() {
 	return &gtavplug2;
 }

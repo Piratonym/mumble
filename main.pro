@@ -1,7 +1,9 @@
-# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Copyright 2005-2017 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
+include(compiler.pri)
 
 TEMPLATE = subdirs
 CONFIG *= ordered debug_and_release
@@ -60,14 +62,17 @@ SUBDIRS *= src/mumble_proto
     }
   }
 
+  contains(UNAME, OpenBSD) {
+    CONFIG *= no-overlay
+  }
+
   unix:!macx:!CONFIG(no-overlay) {
     SUBDIRS *= overlay_gl
   }
 
   macx {
-    MUMBLE_PREFIX = $$(MUMBLE_PREFIX)
-    isEmpty(MUMBLE_PREFIX) {
-      error("Missing $MUMBLE_PREFIX environment variable");
+    !CONFIG(buildenv) {
+      error("Not inside a Mumble buildenv ($MUMBLE_PREFIX environment variable is missing)");
     }
     SUBDIRS *= 3rdparty/mach-override-build
     SUBDIRS *= overlay_gl

@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -59,6 +59,18 @@ void MumbleDBus::getCurrentUrl(const QDBusMessage &msg) {
 	}
 	u.setPath(path.join(QLatin1String("/")));
 	QDBusConnection::sessionBus().send(msg.createReply(QString::fromLatin1(u.toEncoded())));
+}
+
+void MumbleDBus::getTalkingUsers(const QDBusMessage &msg) {
+	if (!g.sh || !g.sh->isRunning() || ! g.uiSession) {
+		QDBusConnection::sessionBus().send(msg.createErrorReply(QLatin1String("net.sourceforge.mumble.Error.connection"), QLatin1String("Not connected")));
+		return;
+	}
+	QStringList names;
+	foreach(ClientUser *cu, ClientUser::getTalking()) {
+		names.append(cu->qsName);
+	}
+	QDBusConnection::sessionBus().send(msg.createReply(names));
 }
 
 void MumbleDBus::focus() {

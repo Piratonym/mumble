@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -20,6 +20,7 @@
 #include "Connection.h"
 #include "ConnectDialog.h"
 #include "Database.h"
+#include "DeveloperConsole.h"
 #include "Global.h"
 #include "GlobalShortcut.h"
 #include "Log.h"
@@ -51,10 +52,6 @@
 
 #ifdef Q_OS_MAC
 #include "AppNap.h"
-#endif
-
-#ifdef USE_COCOA
-#include "ConfigDialog_macx.h"
 #endif
 
 MessageBoxEvent::MessageBoxEvent(QString m) : QEvent(static_cast<QEvent::Type>(MB_QEVENT)) {
@@ -231,6 +228,10 @@ void MainWindow::createActions() {
 	gsSendTextMessage=new GlobalShortcut(this, idx++, tr("Send Text Message", "Global Shortcut"), true, QVariant(QString()));
 	gsSendTextMessage->setObjectName(QLatin1String("gsSendTextMessage"));
 
+	gsSendClipboardTextMessage=new GlobalShortcut(this, idx++, tr("Send Clipboard Text Message", "Global Shortcut"));
+	gsSendClipboardTextMessage->setObjectName(QLatin1String("gsSendClipboardTextMessage"));
+	gsSendClipboardTextMessage->qsWhatsThis = tr("This will send your Clipboard content to the channel you are currently in.", "Global Shortcut");
+
 #ifndef Q_OS_MAC
 	qstiIcon->show();
 #endif
@@ -298,7 +299,7 @@ void MainWindow::setupGui()  {
 
 	setShowDockTitleBars(g.s.wlWindowLayout == Settings::LayoutCustom);
 
-#ifdef USE_COCOA
+#ifdef Q_OS_MAC
 	// Workaround for QTBUG-3116 -- using a unified toolbar on Mac OS X
 	// and using restoreGeometry before the window has updated its frameStrut
 	// causes the MainWindow to jump around on screen on launch.  Workaround
@@ -314,8 +315,8 @@ void MainWindow::setupGui()  {
 	        SLOT(qtvUserCurrentChanged(const QModelIndex &, const QModelIndex &)));
 
 	// QtCreator and uic.exe do not allow adding arbitrary widgets
-	// such as a QComboBox to a QToolbar, even though they are supported.
-	qcbTransmitMode = new QComboBox(qtIconToolbar);
+	// such as a MUComboBox to a QToolbar, even though they are supported.
+	qcbTransmitMode = new MUComboBox(qtIconToolbar);
 	qcbTransmitMode->setObjectName(QLatin1String("qcbTransmitMode"));
 	qcbTransmitMode->addItem(tr("Continuous"));
 	qcbTransmitMode->addItem(tr("Voice Activity"));
@@ -329,7 +330,9 @@ void MainWindow::setupGui()  {
 
 	updateTransmitModeComboBox();
 
-#ifndef Q_OS_MAC
+// For Qt >= 5, enable this call (only) for Windows.
+// For Qt < 5, enable for anything but macOS.
+#if (QT_VERSION >= 0x050000 && defined(Q_OS_WIN)) || (QT_VERSION < 0x050000 && !defined(Q_OS_MAC))
 	setupView(false);
 #endif
 
@@ -352,7 +355,7 @@ void MainWindow::setupGui()  {
 
 	updateTrayIcon();
 
-#ifdef USE_COCOA
+#ifdef Q_OS_MAC
 	setWindowOpacity(1.0f);
 #if QT_VERSION < 0x040700
 	// Process pending events.  This is done to force the unified
@@ -497,10 +500,19 @@ void MainWindow::showEvent(QShowEvent *e) {
 
 void MainWindow::changeEvent(QEvent *e) {
 	QWidget::changeEvent(e);
+
+#ifdef Q_OS_MAC
+	// On modern macOS/Qt combinations, the code below causes Mumble's
+	// MainWindow to not be interactive after returning from being minimized.
+	// (See issue mumble-voip/mumble#2171)
+	// So, let's not do it on macOS.
+
+#else
 	if (isMinimized() && g.s.bHideInTray) {
 		// Workaround http://qt-project.org/forums/viewthread/4423/P15/#50676
 		QTimer::singleShot(0, this, SLOT(hide()));
 	}
+#endif
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *e) {
@@ -2355,15 +2367,6 @@ void MainWindow::on_qaAudioUnlink_triggered() {
 
 void MainWindow::on_qaConfigDialog_triggered() {
 	QDialog *dlg = NULL;
-#ifdef USE_COCOA
-	// To fit in with Mumble skins, we'll only use the Mac OS X
-	// config dialog when we're using the Aqua skin with no external
-	// stylesheet set.  Also, the Mac dialog doesn't work when embedded
-	// inside the interactive overlay, so there we always force a regular
-	// ConfigDialog.
-	if (! g.ocIntercept && !Themes::getConfiguredStyle(g.s))
-		dlg = new ConfigDialogMac(this);
-#endif
 	if (! dlg)
 		dlg = new ConfigDialog(this);
 
@@ -2414,6 +2417,10 @@ void MainWindow::on_qaAudioWizard_triggered() {
 	AudioWizard *aw = new AudioWizard(this);
 	aw->exec();
 	delete aw;
+}
+
+void MainWindow::on_qaDeveloperConsole_triggered() {
+	g.c->show();
 }
 
 void MainWindow::on_qaHelpWhatsThis_triggered() {
@@ -2722,6 +2729,16 @@ void MainWindow::on_gsSendTextMessage_triggered(bool down, QVariant scdata) {
 	Channel *c = ClientUser::get(g.uiSession)->cChannel;
 	g.sh->sendChannelTextMessage(c->iId, qsText, false);
 	g.l->log(Log::TextMessage, tr("To %1: %2").arg(Log::formatChannel(c), qsText), tr("Message to channel %1").arg(c->qsName), true);
+}
+
+void MainWindow::on_gsSendClipboardTextMessage_triggered(bool down, QVariant) {
+	if (!down) {
+		return;
+	}
+
+	// call sendChatbarMessage() instead of on_gsSendTextMessage_triggered() to handle
+	// formatting of the content in the clipboard, i.e., href.  
+	sendChatbarMessage(QApplication::clipboard()->text());
 }
 
 void MainWindow::whisperReleased(QVariant scdata) {

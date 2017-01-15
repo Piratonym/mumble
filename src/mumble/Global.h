@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -8,6 +8,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <QtCore/QDir>
+#include <QtCore/QSharedPointer>
 
 #include "ACL.h"
 #include "Settings.h"
@@ -29,6 +30,8 @@ class LCD;
 class BonjourClient;
 class OverlayClient;
 class CELTCodec;
+class LogEmitter;
+class DeveloperConsole;
 
 class QNetworkAccessManager;
 
@@ -40,8 +43,8 @@ public:
 	MainWindow *mw;
 	Settings s;
 	boost::shared_ptr<ServerHandler> sh;
-	boost::shared_ptr<AudioInput> ai;
-	boost::shared_ptr<AudioOutput> ao;
+	QSharedPointer<AudioInput> ai;
+	QSharedPointer<AudioOutput> ao;
 	Database *db;
 	Log *l;
 	Plugins *p;
@@ -50,6 +53,8 @@ public:
 	LCD *lcd;
 	BonjourClient *bc;
 	QNetworkAccessManager *nam;
+	QSharedPointer<LogEmitter> le;
+	DeveloperConsole *c;
 	int iPushToTalk;
 	Timer tDoublePush;
 	quint64 uiDoublePush;

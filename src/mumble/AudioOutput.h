@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -6,9 +6,9 @@
 #ifndef MUMBLE_MUMBLE_AUDIOOUTPUT_H_
 #define MUMBLE_MUMBLE_AUDIOOUTPUT_H_
 
-#include <boost/shared_ptr.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QThread>
+#include <QtCore/QSharedPointer>
 
 // AudioOutput depends on User being valid. This means it's important
 // to removeBuffer from here BEFORE MainWindow gets any UserLeft
@@ -45,7 +45,7 @@ class ClientUser;
 class AudioOutputUser;
 class AudioOutputSample;
 
-typedef boost::shared_ptr<AudioOutput> AudioOutputPtr;
+typedef QSharedPointer<AudioOutput> AudioOutputPtr;
 
 class AudioOutputRegistrar {
 	private:

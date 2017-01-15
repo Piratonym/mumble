@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -105,7 +105,7 @@ void ShortcutKeyWidget::displayKeys(bool last) {
 	emit keySet(keys.count() > 0, last);
 }
 
-ShortcutActionWidget::ShortcutActionWidget(QWidget *p) : QComboBox(p) {
+ShortcutActionWidget::ShortcutActionWidget(QWidget *p) : MUComboBox(p) {
 	int idx = 0;
 
 	insertItem(idx, tr("Unassigned"));
@@ -148,7 +148,7 @@ unsigned int ShortcutActionWidget::index() const {
 	return itemData(currentIndex()).toUInt();
 }
 
-ShortcutToggleWidget::ShortcutToggleWidget(QWidget *p) : QComboBox(p) {
+ShortcutToggleWidget::ShortcutToggleWidget(QWidget *p) : MUComboBox(p) {
 	int idx = 0;
 
 	insertItem(idx, tr("Off"));
@@ -849,8 +849,9 @@ bool GlobalShortcutEngine::handleButton(const QVariant &button, bool down) {
 
 	if (down) {
 		AudioInputPtr ai = g.ai;
-		if (ai.get())
+		if (ai) {
 			ai->tIdle.restart();
+		}
 	}
 
 	int idx = qlButtonList.indexOf(button);

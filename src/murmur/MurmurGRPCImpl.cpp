@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -254,7 +254,7 @@ void ToRPC(const ::Server *srv, const ::User *u, ::MurmurRPC::User *ru) {
 	ru->set_udp_ping_msecs(su->dUDPPingAvg);
 	ru->set_tcp_ping_msecs(su->dTCPPingAvg);
 
-	ru->set_tcp_only(su->aiUdpFlag.load() == 0);
+	ru->set_tcp_only(QAtomicIntLoad(su->aiUdpFlag) == 0);
 
 	ru->set_address(su->haAddress.toStdString());
 }

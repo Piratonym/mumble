@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -69,6 +69,7 @@ ServerHandler::ServerHandler() {
 	bUdp = true;
 	tConnectionTimeoutTimer = NULL;
 	uiVersion = 0;
+	iInFlightTCPPings = 0;
 
 	// Historically, the qWarning line below initialized OpenSSL for us.
 	// It used to have this comment:
@@ -392,6 +393,11 @@ void ServerHandler::sendPing() {
 	if (!connection)
 		return;
 
+	if (g.s.iMaxInFlightTCPPings >= 0 && iInFlightTCPPings >= g.s.iMaxInFlightTCPPings) {
+		serverConnectionClosed(QAbstractSocket::UnknownSocketError, tr("Server is not responding to TCP pings"));
+		return;
+	}
+
 	CryptState &cs = connection->csCrypt;
 
 	quint64 t = tTimestamp.elapsed();
@@ -426,6 +432,8 @@ void ServerHandler::sendPing() {
 	mpp.set_tcp_packets(static_cast<int>(boost::accumulators::count(accTCP)));
 
 	sendMessage(mpp);
+
+	iInFlightTCPPings += 1;
 }
 
 void ServerHandler::message(unsigned int msgType, const QByteArray &qbaMsg) {
@@ -453,6 +461,11 @@ void ServerHandler::message(unsigned int msgType, const QByteArray &qbaMsg) {
 		if (msg.ParseFromArray(qbaMsg.constData(), qbaMsg.size())) {
 			ConnectionPtr connection(cConnection);
 			if (!connection) return;
+
+			// Reset in-flight TCP ping counter to 0.
+			// We've received a ping. That means the
+			// connection is still OK.
+			iInFlightTCPPings = 0;
 
 			CryptState &cs = connection->csCrypt;
 			cs.uiRemoteGood = msg.good();
@@ -532,6 +545,8 @@ void ServerHandler::serverConnectionConnected() {
 	ConnectionPtr connection(cConnection);
 	if (!connection) return;
 
+	iInFlightTCPPings = 0;
+
 	tConnectionTimeoutTimer->stop();
 
 	if (g.s.bQoS)
@@ -585,12 +600,21 @@ void ServerHandler::serverConnectionConnected() {
 		QMutexLocker qml(&qmUdp);
 
 		qhaRemote = connection->peerAddress();
+		qhaLocal = connection->localAddress();
+		if (qhaLocal.isNull()) {
+			qFatal("ServerHandler: qhaLocal is unexpectedly a null addr");
+		}
 
 		qusUdp = new QUdpSocket(this);
-		if (qhaRemote.protocol() == QAbstractSocket::IPv6Protocol)
-			qusUdp->bind(QHostAddress(QHostAddress::AnyIPv6), 0);
-		else
-			qusUdp->bind(QHostAddress(QHostAddress::Any), 0);
+		if (g.s.bUdpForceTcpAddr) {
+			qusUdp->bind(qhaLocal, 0);
+		} else {
+			if (qhaRemote.protocol() == QAbstractSocket::IPv6Protocol) {
+				qusUdp->bind(QHostAddress(QHostAddress::AnyIPv6), 0);
+			} else {
+				qusUdp->bind(QHostAddress(QHostAddress::Any), 0);
+			}
+		}
 
 		connect(qusUdp, SIGNAL(readyRead()), this, SLOT(udpReady()));
 

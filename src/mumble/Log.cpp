@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -413,22 +413,39 @@ QString Log::validHtml(const QString &html, bool allowReplacement, QTextCursor *
 		}
 	}
 
+	if (!valid) {
+		QString errorImageMessage = tr("[[ No valid image ]]");
+		if (tc) {
+			tc->insertText(errorImageMessage);
+			return QString();
+		} else {
+			return errorImageMessage;
+		}
+	}
+
 	qtd.adjustSize();
 	QSizeF s = qtd.size();
 
-	if (!valid || (s.width() > qr.width()) || (s.height() > qr.height())) {
-		qtd.setPlainText(html);
-		qtd.adjustSize();
-		s = qtd.size();
+	if (!s.isValid()) {
+		QString errorInvalidSizeMessage = tr("[[ Invalid size ]]");
+		if (tc) {
+			tc->insertText(errorInvalidSizeMessage);
+			return QString();
+		} else {
+			return errorInvalidSizeMessage;
+		}
+	}
 
-		if ((s.width() > qr.width()) || (s.height() > qr.height())) {
-			QString errorMessage = tr("[[ Text object too large to display ]]");
-			if (tc) {
-				tc->insertText(errorMessage);
-				return QString();
-			} else {
-				return errorMessage;
-			}
+	int messageSize = s.width() * s.height();
+	int allowedSize = 2048 * 2048;
+
+	if (messageSize > allowedSize) {
+		QString errorSizeMessage = tr("[[ Text object too large to display ]]");
+		if (tc) {
+			tc->insertText(errorSizeMessage);
+			return QString();
+		} else {
+			return errorSizeMessage;
 		}
 	}
 

@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -276,7 +276,12 @@ void Pipe::checkMessage(unsigned int width, unsigned int height) {
 				}
 				break;
 			case OVERLAY_MSGTYPE_BLIT: {
-					RECT r = {omMsg.omb.x, omMsg.omb.y, omMsg.omb.x + omMsg.omb.w, omMsg.omb.y + omMsg.omb.h};
+					RECT r = {
+						static_cast<LONG>(omMsg.omb.x),
+						static_cast<LONG>(omMsg.omb.y),
+						static_cast<LONG>(omMsg.omb.x + omMsg.omb.w),
+						static_cast<LONG>(omMsg.omb.y + omMsg.omb.h)
+					};
 
 					std::vector<RECT>::iterator i = blits.begin();
 					while (i != blits.end()) {

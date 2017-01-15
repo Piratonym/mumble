@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -20,7 +20,7 @@
 #define DX_SAMPLE_BUFFER_SIZE 512
 
 // from os_win.cpp
-extern HWND MumbleHWNDForQWidget(QWidget *w);
+extern HWND mumble_mw_hwnd;
 
 static uint qHash(const GUID &a) {
 	uint val = a.Data1 ^ a.Data2 ^ a.Data3;
@@ -229,30 +229,48 @@ LRESULT CALLBACK GlobalShortcutWin::HookKeyboard(int nCode, WPARAM wParam, LPARA
 		}
 
 		QList<QVariant> ql;
+
+		// Convert the low-level key event to
+		// a DirectInput key ID.
 		unsigned int keyid = static_cast<unsigned int>((key->scanCode << 8) | 0x4);
-		if (key->flags & LLKHF_EXTENDED)
+		if (key->flags & LLKHF_EXTENDED) {
 			keyid |= 0x8000U;
+		}
+
+		// NumLock and Pause need special handling.
+		// For those keys, the method above of setting
+		// bit 15 high when the LLKHF_EXTENDED flag is
+		// set on the low-level key event does not work.
+		//
+		// When we receive a low-level Windows
+		// Pause key event, the extended flag isn't
+		// set, but DirectInput expects it to be.
+		//
+		// The opposite is true for NumLock key,
+		// where the extended flag for the low-level
+		// Windows event is set, but DirectInput expects
+		// it not to be.
+		//
+		// Without this fix-up, we would emit Pause as
+		// NumLock, and NumLock as pause. That was
+		// problematic, because at the same time,
+		// DirectInput would emit the correct key.
+		// This meant that when pressing one of Pause
+		// and NumLock, shortcut actions for both keys
+		// would be triggered.
+		//
+		// Originally reported in mumble-voip/mumble#1353
+		if (key->vkCode == VK_PAUSE) {
+			// Always set the extended bit for Pause.
+			keyid |= 0x8000U;
+		} else if (key->vkCode == VK_NUMLOCK) {
+			// Never set the extended bit for NumLock.
+			keyid &= ~0x8000U;
+		}
+
 		ql << keyid;
 		ql << QVariant(QUuid(GUID_SysKeyboard));
 		bool suppress = gsw->handleButton(ql, !(key->flags & LLKHF_UP));
-
-		if (! suppress && g.ocIntercept) {
-			// In full-GUI-overlay always suppress
-			suppress = true;
-
-			HWND hwnd = MumbleHWNDForQWidget(&g.ocIntercept->qgv);
-
-			GUITHREADINFO gti;
-			ZeroMemory(&gti, sizeof(gti));
-			gti.cbSize = sizeof(gti);
-			::GetGUIThreadInfo(::GetWindowThreadProcessId(hwnd, NULL), &gti);
-
-			if (gti.hwndFocus)
-				hwnd = gti.hwndFocus;
-
-			if (! nomsg)
-				::PostMessage(hwnd, msg, w, l);
-		}
 
 		if (suppress)
 			return 1;
@@ -305,54 +323,6 @@ LRESULT CALLBACK GlobalShortcutWin::HookMouse(int nCode, WPARAM wParam, LPARAM l
 				break;
 			default:
 				break;
-		}
-
-		if (g.ocIntercept) {
-			// In full-GUI-overlay always suppress
-			suppress = true;
-
-			POINT p;
-			GetCursorPos(&p);
-
-			int dx = mouse->pt.x - p.x;
-			int dy = mouse->pt.y - p.y;
-
-			g.ocIntercept->iMouseX = qBound<int>(0, g.ocIntercept->iMouseX + dx, g.ocIntercept->uiWidth - 1);
-			g.ocIntercept->iMouseY = qBound<int>(0, g.ocIntercept->iMouseY + dy, g.ocIntercept->uiHeight - 1);
-
-			WPARAM w = 0;
-			LPARAM l = (static_cast<short>(g.ocIntercept->iMouseX) & 0xFFFF) | ((g.ocIntercept->iMouseY << 16) & 0xFFFF0000);
-
-			if (ucKeyState[VK_CONTROL] & 0x80)
-				w |= MK_CONTROL;
-			if (ucKeyState[VK_LBUTTON] & 0x80)
-				w |= MK_LBUTTON;
-			if (ucKeyState[VK_MBUTTON] & 0x80)
-				w |= MK_MBUTTON;
-			if (ucKeyState[VK_RBUTTON] & 0x80)
-				w |= MK_RBUTTON;
-			if (ucKeyState[VK_SHIFT] & 0x80)
-				w |= MK_SHIFT;
-			if (ucKeyState[VK_XBUTTON1] & 0x80)
-				w |= MK_XBUTTON1;
-			if (ucKeyState[VK_XBUTTON2] & 0x80)
-				w |= MK_XBUTTON2;
-
-			w |= (mouse->mouseData & 0xFFFF0000);
-
-			HWND hwnd = MumbleHWNDForQWidget(&g.ocIntercept->qgv);
-
-			GUITHREADINFO gti;
-			ZeroMemory(&gti, sizeof(gti));
-			gti.cbSize = sizeof(gti);
-			::GetGUIThreadInfo(::GetWindowThreadProcessId(hwnd, NULL), &gti);
-
-			if (gti.hwndCapture)
-				hwnd = gti.hwndCapture;
-
-			::PostMessage(hwnd, msg, w, l);
-
-			QMetaObject::invokeMethod(g.ocIntercept, "updateMouse", Qt::QueuedConnection);
 		}
 
 		bool down = false;
@@ -441,7 +411,10 @@ BOOL GlobalShortcutWin::EnumDevicesCB(LPCDIDEVICEINSTANCE pdidi, LPVOID pContext
 	if (XInputCheck_IsGuidProductXInputDevice(&id->guidproduct)) {
 		cbgsw->nxboxinput += 1;
 
-		qWarning("GlobalShortcutWin: excluded XInput device '%s' (%s) from DirectInput", qPrintable(id->name), qPrintable(id->vguid.toString()));
+		qWarning("GlobalShortcutWin: excluded XInput device '%s' (guid %s guid product %s) from DirectInput",
+		         qPrintable(id->name),
+		         qPrintable(id->vguid.toString()),
+		         qPrintable(id->vguidproduct.toString()));
 		delete id;
 		return DIENUM_CONTINUE;
 	}
@@ -530,7 +503,7 @@ BOOL GlobalShortcutWin::EnumDevicesCB(LPCDIDEVICEINSTANCE pdidi, LPVOID pContext
 			id->qhTypeToOfs[dwType] = dwOfs;
 		}
 
-		if (FAILED(hr = id->pDID->SetCooperativeLevel(MumbleHWNDForQWidget(g.mw), DISCL_NONEXCLUSIVE|DISCL_BACKGROUND)))
+		if (FAILED(hr = id->pDID->SetCooperativeLevel(mumble_mw_hwnd, DISCL_NONEXCLUSIVE|DISCL_BACKGROUND)))
 			qFatal("GlobalShortcutWin: SetCooperativeLevel: %lx", hr);
 
 		if (FAILED(hr = id->pDID->SetDataFormat(&df)))
@@ -547,12 +520,13 @@ BOOL GlobalShortcutWin::EnumDevicesCB(LPCDIDEVICEINSTANCE pdidi, LPVOID pContext
 		if (FAILED(hr = id->pDID->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph)))
 			qFatal("GlobalShortcutWin: SetProperty: %lx", hr);
 
-		qWarning("Adding device %s %s %s:%d type 0x%.8x",
+		qWarning("Adding device %s %s %s:%d type 0x%.8x guid product %s",
 		         qPrintable(QUuid(id->guid).toString()),
 		         qPrintable(name),
 		         qPrintable(sname),
 		         id->qhNames.count(),
-		         pdidi->dwDevType);
+		         pdidi->dwDevType,
+		         qPrintable(id->vguidproduct.toString()));
 
 		cbgsw->qhInputDevices[id->guid] = id;
 	} else {
@@ -779,7 +753,7 @@ QString GlobalShortcutWin::buttonName(const QVariant &v) {
 #ifdef USE_XBOXINPUT
 	if (g.s.bEnableXboxInput && xboxinput->isValid() && guid == XboxInput::s_XboxInputGuid) {
 		uint32_t idx = (type >> 24) & 0xff;
-		uint32_t button = (type & 0x00ffffffff);
+		uint32_t button = (type & 0x00ffffff);
 
 		// Translate from our own button index mapping to
 		// the actual Xbox controller button names.

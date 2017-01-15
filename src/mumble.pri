@@ -1,4 +1,4 @@
-# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Copyright 2005-2017 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -14,8 +14,8 @@ CONFIG		+= qt thread debug_and_release warn_on
 DEFINES		*= MUMBLE_VERSION_STRING=$$VERSION
 INCLUDEPATH	+= $$PWD . ../mumble_proto
 VPATH		+= $$PWD
-HEADERS		*= ACL.h Channel.h CryptState.h Connection.h Group.h HTMLFilter.h User.h Net.h OSInfo.h Timer.h SSL.h Version.h SSLCipherInfo.h SSLCipherInfoTable.h
-SOURCES 	*= ACL.cpp Group.cpp Channel.cpp Connection.cpp HTMLFilter.cpp User.cpp Timer.cpp CryptState.cpp OSInfo.cpp Net.cpp SSL.cpp Version.cpp SSLCipherInfo.cpp
+HEADERS		*= ACL.h Channel.h CryptState.h Connection.h Group.h HTMLFilter.h User.h Net.h OSInfo.h Timer.h SSL.h Version.h SSLCipherInfo.h SSLCipherInfoTable.h licenses.h License.h LogEmitter.h
+SOURCES 	*= ACL.cpp Group.cpp Channel.cpp Connection.cpp HTMLFilter.cpp User.cpp Timer.cpp CryptState.cpp OSInfo.cpp Net.cpp SSL.cpp Version.cpp SSLCipherInfo.cpp License.cpp LogEmitter.cpp
 LIBS		*= -lmumble_proto
 # Note: Protobuf generates into its own directory so we can mark it as a
 #       system include folder for unix. Otherwise the generated code creates
@@ -47,8 +47,8 @@ unix {
 		PKG_CONFIG = pkg-config --static
 	}
 
-	QMAKE_CFLAGS *= "-isystem ../mumble_proto"
-	QMAKE_CXXFLAGS *= "-isystem ../mumble_proto"
+	QMAKE_CFLAGS *= "-I../mumble_proto" "-isystem ../mumble_proto"
+	QMAKE_CXXFLAGS *= "-I../mumble_proto" "-isystem ../mumble_proto"
 
 	CONFIG *= link_pkgconfig
 
@@ -70,11 +70,11 @@ isEqual(QT_MAJOR_VERSION, 4) {
 
 CONFIG(debug, debug|release) {
   CONFIG += console
-  QMAKE_LIBDIR += ../../debug
+  QMAKE_LIBDIR = ../../debug $$QMAKE_LIBDIR
   DESTDIR	= ../../debug
 }
 
 CONFIG(release, debug|release) {
-  QMAKE_LIBDIR += ../../release
+  QMAKE_LIBDIR = ../../release $$QMAKE_LIBDIR
   DESTDIR	= ../../release
 }

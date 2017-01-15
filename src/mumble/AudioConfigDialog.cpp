@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -388,9 +388,9 @@ void AudioInputDialog::on_qcbSystem_currentIndexChanged(int) {
 
 void AudioInputDialog::on_Tick_timeout() {
 	AudioInputPtr ai = g.ai;
-
-	if (ai.get() == NULL || ! ai->sppPreprocess)
+	if (!ai || !ai->sppPreprocess) {
 		return;
+	}
 
 	abSpeech->iBelow = qsTransmitMin->value();
 	abSpeech->iAbove = qsTransmitMax->value();

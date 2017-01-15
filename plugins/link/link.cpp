@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -31,8 +31,8 @@ struct LinkedMem {
 	wchar_t description[2048];
 };
 
-static void about(HWND h) {
-	::MessageBox(h, L"Reads audio position information from linked game", L"Mumble Link Plugin", MB_OK);
+static void about(void *h) {
+	::MessageBox(reinterpret_cast<HWND>(h), L"Reads audio position information from linked game", L"Mumble Link Plugin", MB_OK);
 }
 
 static HANDLE hMapObject = NULL;
@@ -174,6 +174,6 @@ static MumblePlugin linkplug = {
 	fetch
 };
 
-extern "C" __declspec(dllexport) MumblePlugin *getMumblePlugin() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin *getMumblePlugin() {
 	return &linkplug;
 }

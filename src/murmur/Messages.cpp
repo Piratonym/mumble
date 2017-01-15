@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -863,8 +863,7 @@ void Server::msgChannelState(ServerUser *uSource, MumbleProto::ChannelState &msg
 			return;
 		}
 
-		QRegExp re2("\\w");
-		if (re2.indexIn(qsName) == -1) {
+		if (qsName.length() == 0) {
 			PERM_DENIED_TYPE(ChannelName);
 			return;
 		}

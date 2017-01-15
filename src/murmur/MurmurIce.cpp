@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -72,7 +72,7 @@ static void userToUser(const ::User *p, Murmur::User &mp) {
 	mp.udpPing = u->dUDPPingAvg;
 	mp.tcpPing = u->dTCPPingAvg;
 
-	mp.tcponly = u->aiUdpFlag.load() == 0;
+	mp.tcponly = QAtomicIntLoad(u->aiUdpFlag) == 0;
 
 	::Murmur::NetAddress addr(16, 0);
 	const Q_IPV6ADDR &a = u->haAddress.qip6;

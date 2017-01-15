@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -11,12 +11,10 @@
 # include <QtCore/QPointer>
 # include <QtWidgets/QMainWindow>
 # include <QtWidgets/QSystemTrayIcon>
-# include <QtWidgets/QComboBox>
 #else
 # include <QtCore/QWeakPointer>
 # include <QtGui/QMainWindow>
 # include <QtGui/QSystemTrayIcon>
-# include <QtGui/QComboBox>
 #endif
 
 #include <QtNetwork/QAbstractSocket>
@@ -26,6 +24,7 @@
 #include "Mumble.pb.h"
 #include "Usage.h"
 #include "UserLocalVolumeDialog.h"
+#include "MUComboBox.h"
 
 #include "ui_MainWindow.h"
 
@@ -78,7 +77,7 @@ class MainWindow : public QMainWindow, public MessageHandler, public Ui::MainWin
 		GlobalShortcut *gsUnlink, *gsPushMute, *gsJoinChannel, *gsToggleOverlay;
 		GlobalShortcut *gsMinimal, *gsVolumeUp, *gsVolumeDown, *gsWhisper, *gsLinkChannel;
 		GlobalShortcut *gsCycleTransmitMode;
-		GlobalShortcut *gsSendTextMessage;
+		GlobalShortcut *gsSendTextMessage, *gsSendClipboardTextMessage;
 		DockTitleBar *dtbLogDockTitle, *dtbChatDockTitle;
 
 		ACLEditor *aclEdit;
@@ -149,7 +148,7 @@ class MainWindow : public QMainWindow, public MessageHandler, public Ui::MainWin
 
 		PTTButtonWidget *qwPTTButtonWidget;
 
-		QComboBox *qcbTransmitMode;
+		MUComboBox *qcbTransmitMode;
 		QAction *qaTransmitMode;
 		QAction *qaTransmitModeSeparator;
 
@@ -235,6 +234,7 @@ class MainWindow : public QMainWindow, public MessageHandler, public Ui::MainWin
 		void on_qaConfigMinimal_triggered();
 		void on_qaConfigCert_triggered();
 		void on_qaAudioWizard_triggered();
+		void on_qaDeveloperConsole_triggered();
 		void on_qaHelpWhatsThis_triggered();
 		void on_qaHelpAbout_triggered();
 		void on_qaHelpAboutQt_triggered();
@@ -258,6 +258,7 @@ class MainWindow : public QMainWindow, public MessageHandler, public Ui::MainWin
 		void removeTarget(ShortcutTarget *);
 		void on_gsCycleTransmitMode_triggered(bool, QVariant);
 		void on_gsSendTextMessage_triggered(bool, QVariant);
+		void on_gsSendClipboardTextMessage_triggered(bool, QVariant);
 		void on_Reconnect_timeout();
 		void on_Icon_messageClicked();
 		void on_Icon_activated(QSystemTrayIcon::ActivationReason);

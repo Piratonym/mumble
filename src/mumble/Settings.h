@@ -1,4 +1,4 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -190,6 +190,7 @@ struct Settings {
 	bool bOnlyAttenuateSameOutput;
 	bool bAttenuateLoopbacks;
 	int iOutputDelay;
+	bool bUseOpusMusicEncoding;
 
 	QString qsALSAInput, qsALSAOutput;
 	QString qsPulseAudioInput, qsPulseAudioOutput;
@@ -251,6 +252,7 @@ struct Settings {
 	WindowLayout wlWindowLayout;
 	ChannelExpand ceExpand;
 	ChannelDrag ceChannelDrag;
+	ChannelDrag ceUserDrag;
 	bool bMinimalView;
 	bool bHideFrame;
 	enum AlwaysOnTopBehaviour { OnTopNever, OnTopAlways, OnTopInMinimal, OnTopInNormal };
@@ -288,6 +290,22 @@ struct Settings {
 	ProxyType ptProxyType;
 	QString qsProxyHost, qsProxyUsername, qsProxyPassword;
 	unsigned short usProxyPort;
+	/// bUdpForceTcpAddr forces Mumble to bind its UDP
+	/// socket to the same address as its TCP
+	/// connection is using.
+	bool bUdpForceTcpAddr;
+
+	/// iMaxInFlightTCPPings specifies the maximum
+	/// number of ping messages that the client has
+	/// sent, but not yet recieved a response for
+	/// from the server. This value is checked when
+	/// the client sends its next ping message. If
+	/// the maximum is reached, the connection will
+	/// be closed.
+	/// If this setting is assigned a value of 0 or
+	/// a negative number, the TCP ping check is
+	/// disabled.
+	int iMaxInFlightTCPPings;
 
 	/// The service prefix that the WebFetch class will use
 	/// when it constructs its fully-qualified URL. If this

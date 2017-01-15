@@ -1,9 +1,9 @@
-// Copyright 2005-2016 The Mumble Developers. All rights reserved.
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-#include "../mumble_plugin_win32_x86.h" // Include standard plugin header.
+#include "../mumble_plugin_win32_32bit.h" // Include standard plugin header.
 #include "../mumble_plugin_utils.h" // Include plugin header for special functions, like "escape".
 
 static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, float *camera_pos, float *camera_front, float *camera_top, std::string &context, std::wstring &identity) {
@@ -62,22 +62,19 @@ static int fetch(float *avatar_pos, float *avatar_front, float *avatar_top, floa
         return true; // This tells Mumble to ignore all vectors.
     }
 
-    serverid[sizeof(serverid)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-    escape(serverid);
+    escape(serverid, sizeof(serverid));
     std::ostringstream ocontext;
     ocontext << " {\"Server ID\": \"" << serverid << "\"}"; // Set context with server ID
     context = ocontext.str();
 
     std::wostringstream oidentity;
     oidentity << "{";
-    host[sizeof(host)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
-    escape(host);
+    escape(host, sizeof(host));
     // Only include host (IP:port) if it is not empty and does not include the string "bot" (which means it's a local server).
     if (strcmp(host, "") != 0 && strstr(host, "bot") == NULL) {
         oidentity << std::endl << "\"Host\": \"" << host << "\",";
     }
 
-    team[sizeof(team)-1] = 0; // NUL terminate queried C strings. We do this to ensure the strings from the game are NUL terminated. They should be already, but we can't take any chances.
     std::string Team(team);
     if (!Team.empty()) {
         oidentity << std::endl;
@@ -231,10 +228,10 @@ static MumblePlugin2 bf4plug2 = {
     trylock
 };
 
-extern "C" __declspec(dllexport) MumblePlugin *getMumblePlugin() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin *getMumblePlugin() {
     return &bf4plug;
 }
 
-extern "C" __declspec(dllexport) MumblePlugin2 *getMumblePlugin2() {
+extern "C" MUMBLE_PLUGIN_EXPORT MumblePlugin2 *getMumblePlugin2() {
     return &bf4plug2;
 }

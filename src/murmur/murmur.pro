@@ -1,4 +1,4 @@
-# Copyright 2005-2016 The Mumble Developers. All rights reserved.
+# Copyright 2005-2017 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -41,8 +41,8 @@ win32 {
     QT *= widgets
   }
   RESOURCES	*= murmur.qrc
-  SOURCES *= Tray.cpp
-  HEADERS *= Tray.h
+  SOURCES *= Tray.cpp About.cpp
+  HEADERS *= Tray.h About.h
   LIBS *= -luser32
   QMAKE_POST_LINK = $$QMAKE_POST_LINK$$escape_expand(\\n\\t)$$quote(mt.exe -nologo -updateresource:$(DESTDIR_TARGET);1 -manifest ../mumble/mumble.appcompat.manifest)
 }
@@ -204,8 +204,7 @@ bonjour {
 	# could break the build in the future, with newer versions of Qt,
 	# if the API of QSslDiffieHellmanParameters changes when it is
 	# upstreamed.
-	MUMBLE_PREFIX=$$(MUMBLE_PREFIX)
-	!isEmpty(MUMBLE_PREFIX) {
+	CONFIG(buildenv) {
 		DEFINES += USE_QSSLDIFFIEHELLMANPARAMETERS
 	}
 }
