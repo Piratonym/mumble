@@ -1523,7 +1523,7 @@ void MainWindow::qmUser_aboutToShow() {
 		qaUserDeaf->setChecked(p->bDeaf);
 		qaUserPrioritySpeaker->setChecked(p->bPrioritySpeaker);
 		qaUserLocalMute->setChecked(p->bLocalMute);
-		qaUserLocalNoCount->setEnabled(p->bLocalNoCount);
+		qaUserLocalNoCount->setChecked(p->bLocalNoCount);
 		qaUserLocalIgnore->setChecked(p->bLocalIgnore);
 	}
 	updateMenuPermissions();
