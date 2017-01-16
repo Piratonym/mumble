@@ -142,7 +142,7 @@ Database::Database() {
 	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `volume` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `hash` TEXT, `volume` FLOAT)"));
 	execQueryAndLogFailure(query, QLatin1String("CREATE UNIQUE INDEX IF NOT EXISTS `volume_hash` ON `volume`(`hash`)"));
 
-	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `uncounted` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `hash` TEXT)"));
+	execQueryAndLogFailure(query, QLatin1String("CREATE TABLE IF NOT EXISTS `uncounted` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `hash` TEXT, `name` TEXT)"));
 	execQueryAndLogFailure(query, QLatin1String("CREATE UNIQUE INDEX IF NOT EXISTS `uncounted_hash` ON `uncounted`(`hash`)"));
 
 	//Note: A previous snapshot version created a table called 'hidden'
@@ -296,14 +296,15 @@ bool Database::isLocalUncounted(const QString &hash) {
 	return false;
 }
 
-void Database::setLocalUncounted(const QString &hash, bool uncounted) {
+void Database::setLocalUncounted(const QString &hash, const QString &name, bool uncounted) {
 	QSqlQuery query;
 
 	if (uncounted)
-		query.prepare(QLatin1String("INSERT INTO `uncounted` (`hash`) VALUES (?)"));
+		query.prepare(QLatin1String("INSERT INTO `uncounted` (`hash`, `name`) VALUES (?, ?)"));
 	else
 		query.prepare(QLatin1String("DELETE FROM `uncounted` WHERE `hash` = ?"));
 	query.addBindValue(hash);
+        query.addBindValue(name);
 	execQueryAndLogFailure(query);
 }
 

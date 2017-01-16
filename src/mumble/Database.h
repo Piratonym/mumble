@@ -36,7 +36,7 @@ class Database : public QObject {
 		static void setLocalMuted(const QString &hash, bool muted);
 
 		static bool isLocalUncounted(const QString &hash);
-		static void setLocalUncounted(const QString &hash, bool uncounted);
+		static void setLocalUncounted(const QString &hash, const QString &name, bool uncounted);
 		static float getUserLocalVolume(const QString &hash);
 		static void setUserLocalVolume(const QString &hash, float volume);
 

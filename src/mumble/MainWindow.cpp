@@ -1567,7 +1567,7 @@ void MainWindow::on_qaUserLocalNoCount_triggered() {
 
 	p->setLocalNoCount(uncounted);
 	if (! p->qsHash.isEmpty())
-		Database::setLocalUncounted(p->qsHash, uncounted);
+		Database::setLocalUncounted(p->qsHash, p->qsName, uncounted);
 
 	Channel *c = p->cChannel;
 	ModelItem *citem = ModelItem::c_qhChannels.value(c);
