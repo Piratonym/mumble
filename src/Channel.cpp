@@ -9,6 +9,7 @@
 #include "User.h"
 #include "Group.h"
 #include "ACL.h"
+#include "UserModel.h"
 
 #ifdef MUMBLE
 QHash<int, Channel *> Channel::c_qhChannels;
@@ -98,12 +99,17 @@ bool Channel::isNeverVisibleWhenFiltering() const {
 
 #endif // MUMBLE
 
-bool Channel::hasAnyUsersInOrBelow() const {
-	if (!qlUsers.isEmpty()) {
+bool Channel::isEmpty() {
+	ModelItem *mi = ModelItem::c_qhChannels.value(this);
+	return mi->iUsers == 0;
+}
+
+bool Channel::hasAnyUsersInOrBelow() {
+	if (!this->isEmpty()) {
 		return true;
 	}
 	
-	foreach (const Channel *channel, qlChannels) {
+	foreach (Channel *channel, qlChannels) {
 		if (channel->hasAnyUsersInOrBelow()) {
 			return true;
 		}

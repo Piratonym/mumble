@@ -306,7 +306,7 @@ static bool isSessionUserInOrBelowChannel(const Channel *channel) {
 	return channel->isUserInOrBelow(user);
 }
 
-bool isChannelFiltered(const Channel *c) {
+bool isChannelFiltered(Channel *c) {
 	if (!g.s.bFilterActive) {
 		return false;
 	}

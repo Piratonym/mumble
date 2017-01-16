@@ -86,7 +86,8 @@ class Channel : public QObject {
 		void addClientUser(ClientUser *p);
 #endif // MUMBLE
 		
-		bool hasAnyUsersInOrBelow() const;
+		bool isEmpty();
+		bool hasAnyUsersInOrBelow();
 		bool isUserInOrBelow(const User *user) const;
 		
 		static bool lessThan(const Channel *, const Channel *);
