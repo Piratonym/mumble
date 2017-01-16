@@ -176,9 +176,9 @@ void UserView::mouseReleaseEvent(QMouseEvent *evt) {
 		} else if (channel && !channel->qbaDescHash.isEmpty()) {
 			hasComment = true;
 
-			if (channel->bFiltered)
+			if (channel->filteredVisibility != Channel::FILTERED_VISIBILITY_NORMAL) {
 				commentFlagPxOffset -= UserDelegate::FLAG_DIMENSION;
-
+			}
 		}
 
 		if (hasComment) {
@@ -293,26 +293,39 @@ void UserView::selectSearchResult() {
 	qpmiSearch = QPersistentModelIndex();
 }
 
-bool channelHasUsers(Channel *c)
-{
-	ModelItem *mi = ModelItem::c_qhChannels.value(c);
-	return !(mi->iUsers == 0);
+static bool isSessionUserInOrBelowChannel(const Channel *channel) {
+	if (g.uiSession == 0) {
+		return false;
+	}
+	
+	const ClientUser *user = ClientUser::get(g.uiSession);
+	if (user == NULL) {
+		return false;
+	}
+	
+	return channel->isUserInOrBelow(user);
 }
 
-static bool channelFiltered(const Channel *c)
-{
-	while(c) {
-		if(c->bFiltered)
-			return true;
-		c=c->cParent;
+bool isChannelFiltered(const Channel *c) {
+	if (!g.s.bFilterActive) {
+		return false;
 	}
-	return false;
+	
+	if (c->isAlwaysVisibleWhenFiltering()) {
+		return false;
+	}
+	
+	if (c->isNeverVisibleWhenFiltering()) {
+		return !isSessionUserInOrBelowChannel(c);
+	}
+	
+	return g.s.bFilterHidesEmptyChannels && !c->hasAnyUsersInOrBelow();
 }
 
 void UserView::updateChannel(const QModelIndex &idx) {
 	UserModel *um = static_cast<UserModel *>(model());
 
-	if(!idx.isValid())
+	if (!idx.isValid())
 		return;
 
 	Channel * c = um->getChannel(idx);
@@ -322,38 +335,8 @@ void UserView::updateChannel(const QModelIndex &idx) {
 		updateChannel(idx.child(i,0));
 	}
 
-	if(c && idx.parent().isValid()) {
-
-		if(g.s.bFilterActive == false) {
-			setRowHidden(idx.row(),idx.parent(),false);
-		} else {
-			bool isChannelUserIsIn = false;
-			
-			// Check whether user resides in this channel or a subchannel
-			if (g.uiSession != 0) {
-				const ClientUser* user = ClientUser::get(g.uiSession);
-				if (user != NULL) {
-					Channel *chan = user->cChannel;
-					while (chan) {
-						if (chan == c) {
-							isChannelUserIsIn = true;
-							break;
-						}
-						chan = chan->cParent;
-					}
-				}
-			}
-			
-			if(channelFiltered(c) && !isChannelUserIsIn) {
-				setRowHidden(idx.row(),idx.parent(),true);
-			} else {
-				if(g.s.bFilterHidesEmptyChannels && !channelHasUsers(c)) {
-					setRowHidden(idx.row(),idx.parent(),true);
-				} else {
-					setRowHidden(idx.row(),idx.parent(),false);
-				}
-			}
-		}
+	if (c && idx.parent().isValid()) {
+		setRowHidden(idx.row(), idx.parent(), isChannelFiltered(c));
 	}
 }
 
