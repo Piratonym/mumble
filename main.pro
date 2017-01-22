@@ -39,7 +39,6 @@ SUBDIRS *= src/mumble_proto
 
   win32 {
     SUBDIRS *= 3rdparty/xinputcheck-build
-    SUBDIRS *= 3rdparty/minhook-build
   }
 
   SUBDIRS *= src/mumble
@@ -52,14 +51,16 @@ SUBDIRS *= src/mumble_proto
     SUBDIRS *= plugins
   }
 
-  win32 {
+  win32:!CONFIG(no-overlay) {
+    SUBDIRS *= 3rdparty/minhook-build
     SUBDIRS *= overlay
     SUBDIRS *= overlay/overlay_exe
     SUBDIRS *= overlay_winx64
     SUBDIRS *= overlay_winx64/overlay_exe_winx64
-    !CONFIG(no-g15) {
-      SUBDIRS *= g15helper
-    }
+  }
+
+  win32:!CONFIG(no-g15) {
+    SUBDIRS *= g15helper
   }
 
   contains(UNAME, OpenBSD) {
