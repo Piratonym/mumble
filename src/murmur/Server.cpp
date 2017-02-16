@@ -50,6 +50,13 @@ bool SslServer::hasDualStackSupport() {
 	bool result = false;
 #ifdef Q_OS_UNIX
 	int s = ::socket(AF_INET6, SOCK_STREAM, 0);
+	if (s != -1) {
+		const int ipv6only = 0;
+		if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&ipv6only), sizeof(ipv6only)) == 0) {
+			result = true;
+		}
+		::close(s);
+	}
 #else
 	WSADATA wsaData;
 	WORD wVersionRequested = MAKEWORD(2, 2);
@@ -59,17 +66,11 @@ bool SslServer::hasDualStackSupport() {
 	}
 
 	SOCKET s = ::WSASocket(AF_INET6, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-#endif
-
-	if (s != -1) { // Equals INVALID_SOCKET
+	if (s != INVALID_SOCKET) {
 		const int ipv6only = 0;
 		if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&ipv6only), sizeof(ipv6only)) == 0) {
 			result = true;
 		}
-#ifdef Q_OS_UNIX
-		::close(s);
-	}
-#else
 		closesocket(s);
 	}
 	WSACleanup();
@@ -977,6 +978,7 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 		return;
 
 	QByteArray qba, qba_npos;
+	unsigned int counter;
 	char buffer[UDP_PACKET_SIZE];
 	PacketDataStream pdi(data + 1, len - 1);
 	PacketDataStream pds(buffer+1, UDP_PACKET_SIZE-1);
@@ -997,9 +999,11 @@ void Server::processMsg(ServerUser *u, const char *data, int len) {
 		}
 	}
 
+	// Read the sequence number.
+	pdi >> counter;
+
 	// Skip to the end of the voice data.
 	if ((type >> 5) != MessageHandler::UDPVoiceOpus) {
-		unsigned int counter;
 		do {
 			counter = pdi.next8();
 			pdi.skip(counter & 0x7f);
