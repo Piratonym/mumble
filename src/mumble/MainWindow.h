@@ -223,7 +223,6 @@ class MainWindow : public QMainWindow, public MessageHandler, public Ui::MainWin
 		void on_qaChannelFilterVisibilityAlways_triggered();
 		void on_qaChannelFilterVisibilityNever_triggered();
 		void on_qaChannelFilterVisibilityNormal_triggered();
-		void on_qaChannelFilter_triggered();
 		void on_qaChannelCopyURL_triggered();
 		void on_qaAudioReset_triggered();
 		void on_qaAudioMute_triggered();
