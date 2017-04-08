@@ -157,6 +157,7 @@ void LookConfig::load(const Settings &r) {
 	loadComboBox(qcbUserDrag, r.ceUserDrag);
 	loadCheckBox(qcbUsersTop, r.bUserTop);
 	loadCheckBox(qcbAskOnQuit, r.bAskOnQuit);
+	loadCheckBox(qcbEnableDeveloperMenu, r.bEnableDeveloperMenu);
 	loadCheckBox(qcbHideTray, r.bHideInTray);
 	loadCheckBox(qcbStateInTray, r.bStateInTray);
 	loadCheckBox(qcbShowUserCount, r.bShowUserCount);
@@ -203,6 +204,7 @@ void LookConfig::save() const {
 	
 	s.aotbAlwaysOnTop = static_cast<Settings::AlwaysOnTopBehaviour>(qcbAlwaysOnTop->currentIndex());
 	s.bAskOnQuit = qcbAskOnQuit->isChecked();
+	s.bEnableDeveloperMenu = qcbEnableDeveloperMenu->isChecked();
 	s.bHideInTray = qcbHideTray->isChecked();
 	s.bStateInTray = qcbStateInTray->isChecked();
 	s.bShowUserCount = qcbShowUserCount->isChecked();
@@ -222,15 +224,6 @@ void LookConfig::save() const {
 
 void LookConfig::accept() const {
 	g.mw->setShowDockTitleBars(g.s.wlWindowLayout == Settings::LayoutCustom);
-}
-
-bool LookConfig::expert(bool b) {
-	qcbExpand->setVisible(b);
-	qliExpand->setVisible(b);
-	qcbUsersTop->setVisible(b);
-	qcbStateInTray->setVisible(b);
-	qcbShowContextMenuInMenuBar->setVisible(b);
-	return true;
 }
 
 void LookConfig::themeDirectoryChanged() {

@@ -1,3 +1,11 @@
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
+// Include murmur_pch.h for STACKVAR
+#include "murmur_pch.h"
+
 #include <QtCore>
 #include <QtTest>
 
@@ -161,14 +169,14 @@ void TestCrypt::authcrypt() {
 		CryptState cs;
 		cs.setKey(rawkey, nonce, nonce);
 
-		unsigned char src[len];
+		STACKVAR(unsigned char, src, len);
 		for (int i=0;i<len;i++)
 			src[i] = (i + 1);
 
 		unsigned char enctag[AES_BLOCK_SIZE];
 		unsigned char dectag[AES_BLOCK_SIZE];
-		unsigned char encrypted[len];
-		unsigned char decrypted[len];
+		STACKVAR(unsigned char, encrypted, len);
+		STACKVAR(unsigned char, decrypted, len);
 
 		cs.ocb_encrypt(src, encrypted, len, nonce, enctag);
 		cs.ocb_decrypt(encrypted, decrypted, len, nonce, dectag);
@@ -190,8 +198,8 @@ void TestCrypt::tamper() {
 	const unsigned char msg[] = "It was a funky funky town!";
 	int len = sizeof(msg);
 
-	unsigned char encrypted[len+4];
-	unsigned char decrypted[len];
+	STACKVAR(unsigned char, encrypted, len+4);
+	STACKVAR(unsigned char, decrypted, len);
 	cs.encrypt(msg, encrypted, len);
 
 	for (int i=0;i<len*8;i++) {

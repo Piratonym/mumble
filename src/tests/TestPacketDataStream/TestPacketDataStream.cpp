@@ -1,3 +1,8 @@
+// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file at the root of the
+// Mumble source tree or at <https://www.mumble.info/LICENSE>.
+
 #include <QtCore>
 #include <QtNetwork>
 #include <QtTest>
@@ -88,7 +93,7 @@ void TestPacketDataStream::string_data() {
 	QTest::addColumn<QString>("string");
 	QTest::newRow("Empty") << QString("");
 	QTest::newRow("Null") << QString();
-	QTest::newRow("Bærtur") << QString("Bærtur");
+	QTest::newRow("BÃ¦rtur") << QString("BÃ¦rtur");
 }
 
 void TestPacketDataStream::string() {
