@@ -55,6 +55,7 @@ void NetworkConfig::load(const Settings &r) {
 	qlePassword->setText(r.qsProxyPassword);
 
 	loadCheckBox(qcbImageDownload, r.iMaxImageSize <= 0);
+	loadCheckBox(qcbHideOS, s.bHideOS);
 
 	loadCheckBox(qcbAutoUpdate, r.bUpdateCheck);
 	loadCheckBox(qcbPluginUpdate, r.bPluginCheck);
@@ -72,6 +73,7 @@ void NetworkConfig::save() const {
 	s.bReconnect = qcbAutoReconnect->isChecked();
 	s.bAutoConnect = qcbAutoConnect->isChecked();
 	s.bSuppressIdentity = qcbSuppressIdentity->isChecked();
+	s.bHideOS = qcbHideOS->isChecked();
 
 	s.ptProxyType = static_cast<Settings::ProxyType>(qcbType->currentIndex());
 	s.qsProxyHost = qleHostname->text();
@@ -134,19 +136,6 @@ bool NetworkConfig::TcpModeEnabled() {
 
 void NetworkConfig::accept() const {
 	NetworkConfig::SetupProxy();
-}
-
-bool NetworkConfig::expert(bool b) {
-	qcbTcpMode->setVisible(b);
-	qcbQoS->setVisible(b);
-	qgbProxy->setVisible(b);
-	qcbUsage->setVisible(b);
-
-	qgbMisc->setVisible(b); // For now Misc only contains elements visible in expert mode
-	qcbImageDownload->setVisible(b);
-	qcbSuppressIdentity->setVisible(b);
-
-	return true;
 }
 
 void NetworkConfig::on_qcbType_currentIndexChanged(int v) {

@@ -4,7 +4,7 @@
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
 include(../mumble.pri)
-include(../../protoc.pri)
+include(../../qmake/protoc.pri)
 
 DEFINES *= MURMUR
 TEMPLATE	=app
@@ -45,7 +45,9 @@ win32 {
   SOURCES *= Tray.cpp About.cpp
   HEADERS *= Tray.h About.h
   LIBS *= -luser32
-  QMAKE_POST_LINK = $$QMAKE_POST_LINK$$escape_expand(\\n\\t)$$quote(mt.exe -nologo -updateresource:$(DESTDIR_TARGET);1 -manifest ../mumble/mumble.appcompat.manifest)
+  win32-msvc* {
+    QMAKE_POST_LINK = $$QMAKE_POST_LINK$$escape_expand(\\n\\t)$$quote(mt.exe -nologo -updateresource:$(DESTDIR_TARGET);1 -manifest ../mumble/mumble.appcompat.manifest)
+  }
 }
 
 unix {
@@ -203,4 +205,4 @@ bonjour {
 	DEFINES += USE_QSSLDIFFIEHELLMANPARAMETERS
 }
 
-include(../../symbols.pri)
+include(../../qmake/symbols.pri)

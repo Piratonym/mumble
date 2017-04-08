@@ -129,7 +129,7 @@ OverlaySettings::OverlaySettings() {
 	qrfTime = QRectF(0.0f, 0.0, -1, 0.023438f);
 	bTime = false;
 
-	bUseWhitelist = false;
+	oemOverlayExcludeMode = OverlaySettings::LauncherFilterExclusionMode;
 }
 
 void OverlaySettings::setPreset(const OverlayPresets preset) {
@@ -231,7 +231,7 @@ Settings::Settings() {
 	fVolume = 1.0f;
 	fOtherVolume = 0.5f;
 	bAttenuateOthersOnTalk = false;
-	bAttenuateOthers = true;
+	bAttenuateOthers = false;
 	bAttenuateUsersOnPrioritySpeak = false;
 	bOnlyAttenuateSameOutput = false;
 	bAttenuateLoopbacks = false;
@@ -284,6 +284,7 @@ Settings::Settings() {
 	bHideFrame = false;
 	aotbAlwaysOnTop = OnTopNever;
 	bAskOnQuit = true;
+	bEnableDeveloperMenu = false;
 #ifdef Q_OS_WIN
 	// Don't enable minimize to tray by default on Windows >= 7
 	const QSysInfo::WinVersion winVer = QSysInfo::windowsVersion();
@@ -353,6 +354,7 @@ Settings::Settings() {
 	iMaxImageHeight = 1024;
 	bSuppressIdentity = false;
 	qsSslCiphers = MumbleSSL::defaultOpenSSLCipherString();
+	bHideOS = false;
 
 	bShowTransmitModeComboBox = false;
 
@@ -395,6 +397,7 @@ Settings::Settings() {
 	bEnableXInput2 = true;
 	bEnableGKey = true;
 	bEnableXboxInput = true;
+	bEnableWinHooks = true;
 	bDirectInputVerboseLogging = false;
 
 	for (int i=Log::firstMsgType; i<=Log::lastMsgType; ++i) {
@@ -562,9 +565,15 @@ void OverlaySettings::load(QSettings* settings_ptr) {
 	LOADFLAG(qaMutedDeafened, "mutedalign");
 	LOADFLAG(qaAvatar, "avataralign");
 
-	SAVELOAD(bUseWhitelist, "usewhitelist");
-	SAVELOAD(qslBlacklist, "blacklist");
+	LOADENUM(oemOverlayExcludeMode, "mode");
+	SAVELOAD(qslLaunchers, "launchers");
+	SAVELOAD(qslLaunchersExclude, "launchersexclude");
 	SAVELOAD(qslWhitelist, "whitelist");
+	SAVELOAD(qslWhitelistExclude, "whitelistexclude");
+	SAVELOAD(qslPaths, "paths");
+	SAVELOAD(qslPathsExclude, "pathsexclude");
+	SAVELOAD(qslBlacklist, "blacklist");
+	SAVELOAD(qslBlacklistExclude, "blacklistexclude");
 }
 
 void Settings::load() {
@@ -672,6 +681,7 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
 	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
 	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
+	SAVELOAD(bHideOS, "net/hideos");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
@@ -685,6 +695,7 @@ void Settings::load(QSettings* settings_ptr) {
 	LOADENUM(ceUserDrag, "ui/userdrag");
 	LOADENUM(aotbAlwaysOnTop, "ui/alwaysontop");
 	SAVELOAD(bAskOnQuit, "ui/askonquit");
+	SAVELOAD(bEnableDeveloperMenu, "ui/developermenu");
 	SAVELOAD(bMinimalView, "ui/minimalview");
 	SAVELOAD(bHideFrame, "ui/hideframe");
 	SAVELOAD(bUserTop, "ui/usertop");
@@ -752,6 +763,7 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bEnableXInput2, "shortcut/x11/xinput2/enable");
 	SAVELOAD(bEnableGKey, "shortcut/gkey");
 	SAVELOAD(bEnableXboxInput, "shortcut/windows/xbox/enable");
+	SAVELOAD(bEnableWinHooks, "winhooks");
 	SAVELOAD(bDirectInputVerboseLogging, "shortcut/windows/directinput/verboselogging");
 
 	int nshorts = settings_ptr->beginReadArray(QLatin1String("shortcuts"));
@@ -879,9 +891,15 @@ void OverlaySettings::save(QSettings* settings_ptr) {
 	SAVEFLAG(qaMutedDeafened, "mutedalign");
 	SAVEFLAG(qaAvatar, "avataralign");
 
-	settings_ptr->setValue(QLatin1String("usewhitelist"), bUseWhitelist);
-	settings_ptr->setValue(QLatin1String("blacklist"), qslBlacklist);
+	SAVELOAD(oemOverlayExcludeMode, "mode");
+	settings_ptr->setValue(QLatin1String("launchers"), qslLaunchers);
+	settings_ptr->setValue(QLatin1String("launchersexclude"), qslLaunchersExclude);
 	settings_ptr->setValue(QLatin1String("whitelist"), qslWhitelist);
+	settings_ptr->setValue(QLatin1String("whitelistexclude"), qslWhitelistExclude);
+	settings_ptr->setValue(QLatin1String("paths"), qslPaths);
+	settings_ptr->setValue(QLatin1String("pathsexclude"), qslPathsExclude);
+	settings_ptr->setValue(QLatin1String("blacklist"), qslBlacklist);
+	settings_ptr->setValue(QLatin1String("blacklistexclude"), qslBlacklistExclude);
 }
 
 void Settings::save() {
@@ -987,6 +1005,7 @@ void Settings::save() {
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
 	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
 	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
+	SAVELOAD(bHideOS, "net/hideos");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
@@ -1000,6 +1019,7 @@ void Settings::save() {
 	SAVELOAD(ceUserDrag, "ui/userdrag");
 	SAVELOAD(aotbAlwaysOnTop, "ui/alwaysontop");
 	SAVELOAD(bAskOnQuit, "ui/askonquit");
+	SAVELOAD(bEnableDeveloperMenu, "ui/developermenu");
 	SAVELOAD(bMinimalView, "ui/minimalview");
 	SAVELOAD(bHideFrame, "ui/hideframe");
 	SAVELOAD(bUserTop, "ui/usertop");
@@ -1062,7 +1082,9 @@ void Settings::save() {
 	SAVELOAD(bSuppressMacEventTapWarning, "shortcut/mac/suppresswarning");
 	SAVELOAD(bEnableEvdev, "shortcut/linux/evdev/enable");
 	SAVELOAD(bEnableXInput2, "shortcut/x11/xinput2/enable");
+	SAVELOAD(bEnableGKey, "shortcut/gkey");
 	SAVELOAD(bEnableXboxInput, "shortcut/windows/xbox/enable");
+	SAVELOAD(bEnableWinHooks, "winhooks");
 	SAVELOAD(bDirectInputVerboseLogging, "shortcut/windows/directinput/verboselogging");
 
 	settings_ptr->beginWriteArray(QLatin1String("shortcuts"));

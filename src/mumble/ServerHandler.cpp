@@ -35,6 +35,8 @@ static HANDLE loadQoS() {
 
 	HRESULT hr = E_FAIL;
 
+// We don't support delay-loading QoS on MinGW. Only enable it for MSVC.
+#ifdef _MSC_VER
 	__try {
 		hr = __HrLoadAllImportsForDll("qwave.dll");
 	}
@@ -42,6 +44,7 @@ static HANDLE loadQoS() {
 	__except(EXCEPTION_EXECUTE_HANDLER) {
 		hr = E_FAIL;
 	}
+#endif
 
 	if (! SUCCEEDED(hr)) {
 		qWarning("ServerHandler: Failed to load qWave.dll, no QoS available");
@@ -574,8 +577,11 @@ void ServerHandler::serverConnectionConnected() {
 		mpv.set_version(version);
 	}
 
-	mpv.set_os(u8(OSInfo::getOS()));
-	mpv.set_os_version(u8(OSInfo::getOSDisplayableVersion()));
+	if (!g.s.bHideOS) {
+		mpv.set_os(u8(OSInfo::getOS()));
+		mpv.set_os_version(u8(OSInfo::getOSDisplayableVersion()));
+	}
+
 	sendMessage(mpv);
 
 	MumbleProto::Authenticate mpa;
@@ -645,7 +651,7 @@ void ServerHandler::serverConnectionConnected() {
 				addr.sin_addr.s_addr = htonl(qhaRemote.toIPv4Address());
 
 				dwFlowUDP = 0;
-				if (! QOSAddSocketToFlow(hQoS, qusUdp->socketDescriptor(), reinterpret_cast<sockaddr *>(&addr), QOSTrafficTypeVoice, QOS_NON_ADAPTIVE_FLOW, &dwFlowUDP))
+				if (! QOSAddSocketToFlow(hQoS, qusUdp->socketDescriptor(), reinterpret_cast<sockaddr *>(&addr), QOSTrafficTypeVoice, QOS_NON_ADAPTIVE_FLOW, reinterpret_cast<PQOS_FLOWID>(&dwFlowUDP)))
 					qWarning("ServerHandler: Failed to add UDP to QOS");
 			}
 #endif

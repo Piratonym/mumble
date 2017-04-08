@@ -46,8 +46,12 @@ static bool canRun64BitPrograms() {
 #endif
 }
 
-OverlayPrivateWin::OverlayPrivateWin(QObject *p) : OverlayPrivate(p) {
-	m_active = false;
+OverlayPrivateWin::OverlayPrivateWin(QObject *p)
+	: OverlayPrivate(p)
+	, m_helper_enabled(true)
+	, m_helper64_enabled(true)
+	, m_mumble_handle(0)
+	, m_active(false) {
 
 	// Acquire a handle to ourselves and duplicate it. We duplicate it because
 	// want it to be inheritable by our helper processes, and the handle returned

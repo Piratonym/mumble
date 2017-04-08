@@ -100,6 +100,7 @@ Server::Server(int snum, QObject *p) : QThread(p) {
 #ifdef USE_BONJOUR
 	bsRegistration = NULL;
 #endif
+	bUsingMetaCert = false;
 
 #ifdef Q_OS_UNIX
 	aiNotify[0] = aiNotify[1] = -1;
@@ -908,7 +909,7 @@ void Server::sendMessage(ServerUser *u, const char *data, int len, QByteArray &c
 #ifdef Q_OS_WIN
 		DWORD dwFlow = 0;
 		if (Meta::hQoS)
-			QOSAddSocketToFlow(Meta::hQoS, u->sUdpSocket, reinterpret_cast<struct sockaddr *>(& u->saiUdpAddress), QOSTrafficTypeVoice, QOS_NON_ADAPTIVE_FLOW, &dwFlow);
+			QOSAddSocketToFlow(Meta::hQoS, u->sUdpSocket, reinterpret_cast<struct sockaddr *>(& u->saiUdpAddress), QOSTrafficTypeVoice, QOS_NON_ADAPTIVE_FLOW, reinterpret_cast<PQOS_FLOWID>(&dwFlow));
 #endif
 #ifdef Q_OS_LINUX
 		struct msghdr msg;
@@ -1197,8 +1198,23 @@ void Server::newClient() {
 
 		sock->setPrivateKey(qskKey);
 		sock->setLocalCertificate(qscCert);
+
+		// Treat the leaf certificate as a root.
+		// This shouldn't strictly be necessary,
+		// and is a left-over from early on.
+		// Perhaps it is necessary for self-signed
+		// certs?
 		sock->addCaCertificate(qscCert);
-		sock->addCaCertificates(qlCA);
+
+		// Add CA certificates specified via
+		// murmur.ini's sslCA option.
+		sock->addCaCertificates(Meta::mp.qlCA);
+
+		// Add intermediate CAs found in the PEM
+		// bundle used for this server's certificate.
+		sock->addCaCertificates(qlIntermediates);
+
+		sock->setCiphers(Meta::mp.qlCiphers);
 
 #if defined(USE_QSSLDIFFIEHELLMANPARAMETERS)
 		QSslConfiguration cfg = sock->sslConfiguration();

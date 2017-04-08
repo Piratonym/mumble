@@ -10,6 +10,10 @@
 #include <dbghelp.h>
 #include <emmintrin.h>
 #include <math.h>
+#include <float.h>
+#include <shobjidl.h>
+#include <shlobj.h>
+#include <share.h> // For share flags for _wfsopen
 
 #include "Global.h"
 #include "Version.h"
@@ -64,9 +68,11 @@ static void mumbleMessageOutputQString(QtMsgType type, const QString &msg) {
 	}
 }
 
+#if QT_VERSION < 0x050000
 static void mumbleMessageOutput(QtMsgType type, const char *msg) {
 	mumbleMessageOutputQString(type, QString::fromUtf8(msg));
 }
+#endif
 
 #if QT_VERSION >= 0x050000
 static void mumbleMessageOutputWithContext(QtMsgType type, const QMessageLogContext &ctx, const QString &msg) {
@@ -150,6 +156,8 @@ BOOL SetHeapOptions() {
 	return fRet;
 }
 
+// We only support delay-loading on MSVC, not on MinGW.
+#ifdef _MSC_VER
 FARPROC WINAPI delayHook(unsigned dliNotify, PDelayLoadInfo pdli) {
 	if (dliNotify != dliNotePreLoadLibrary)
 		return 0;
@@ -201,6 +209,7 @@ FARPROC WINAPI delayHook(unsigned dliNotify, PDelayLoadInfo pdli) {
 }
 
 decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = delayHook;
+#endif
 
 void os_init() {
 	__cpuid(cpuinfo, 1);

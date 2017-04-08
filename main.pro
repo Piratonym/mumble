@@ -3,7 +3,7 @@
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-include(compiler.pri)
+include(qmake/compiler.pri)
 
 TEMPLATE = subdirs
 CONFIG *= ordered debug_and_release
@@ -99,6 +99,10 @@ SUBDIRS *= src/mumble_proto
     SUBDIRS *= src/murmur/murmur_grpc
   }
   SUBDIRS *= src/murmur
+}
+
+CONFIG(tests) {
+  SUBDIRS *= src/tests
 }
 
 DIST=LICENSE INSTALL README README.Linux CHANGES

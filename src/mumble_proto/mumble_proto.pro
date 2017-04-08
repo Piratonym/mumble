@@ -3,8 +3,8 @@
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-include(../../compiler.pri)
-include(../../protoc.pri)
+include(../../qmake/compiler.pri)
+include(../../qmake/protoc.pri)
 
 PROTOBUF	*= ../Mumble.proto
 
@@ -26,7 +26,8 @@ CONFIG -= qt
 CONFIG += debug_and_release
 CONFIG += staticlib
 
-INCLUDEPATH *= "$$PROTOBUF_PATH/vsprojects/include" "$$PROTOBUF_PATH/src" protobuf
+# Add protobuf dependency
+include(../../qmake/protobuf.pri)
 
 QMAKE_EXTRA_COMPILERS *= pb pbh
 
@@ -45,4 +46,4 @@ CONFIG(release, debug|release) {
 	DESTDIR = ../../release
 }
 
-include(../../symbols.pri)
+include(../../qmake/symbols.pri)
