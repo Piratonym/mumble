@@ -306,6 +306,7 @@ struct Settings {
 	/// socket to the same address as its TCP
 	/// connection is using.
 	bool bUdpForceTcpAddr;
+	bool bHideOS;
 
 	/// iMaxInFlightTCPPings specifies the maximum
 	/// number of ping messages that the client has
