@@ -686,6 +686,9 @@ void Settings::load(QSettings* settings_ptr) {
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
 
+	// Privacy settings
+	SAVELOAD(bHideOS, "privacy/hideos");
+
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");
 	SAVELOAD(themeName, "ui/theme");
@@ -1009,6 +1012,9 @@ void Settings::save() {
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
+
+	// Privacy settings
+	SAVELOAD(bHideOS, "privacy/hideos");
 
 	SAVELOAD(bExpert, "ui/expert");
 	SAVELOAD(qsLanguage, "ui/language");
