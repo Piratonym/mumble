@@ -681,7 +681,6 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
 	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
 	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
-	SAVELOAD(bHideOS, "net/hideos");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");
@@ -1008,7 +1007,6 @@ void Settings::save() {
 	SAVELOAD(qsServicePrefix, "net/serviceprefix");
 	SAVELOAD(iMaxInFlightTCPPings, "net/maxinflighttcppings");
 	SAVELOAD(bUdpForceTcpAddr, "net/udpforcetcpaddr");
-	SAVELOAD(bHideOS, "net/hideos");
 
 	// Network settings - SSL
 	SAVELOAD(qsSslCiphers, "net/sslciphers");

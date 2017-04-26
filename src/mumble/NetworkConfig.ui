@@ -292,20 +292,6 @@ Prevents the client from downloading images embedded into chat messages with the
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="qcbHideOS">
-        <property name="toolTip">
-         <string>Prevent OS information being sent to the server</string>
-        </property>
-        <property name="whatsThis">
-         <string>&lt;b&gt;Don't send OS information to the server&lt;/b&gt;&lt;br/&gt;
-Prevents the client from sending potentially identifying information about the operating system to the server.</string>
-        </property>
-        <property name="text">
-         <string>Hide OS information</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
