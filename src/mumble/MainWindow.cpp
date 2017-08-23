@@ -303,7 +303,7 @@ void MainWindow::setupGui()  {
 	qteChat->setDefaultText(tr("<center>Not connected</center>"), true);
 	qteChat->setEnabled(false);
 
-	setShowDockTitleBars(g.s.wlWindowLayout == Settings::LayoutCustom);
+	setShowDockTitleBars((g.s.wlWindowLayout == Settings::LayoutCustom) && !g.s.bLockLayout);
 
 #ifdef Q_OS_MAC
 	// Workaround for QTBUG-3116 -- using a unified toolbar on Mac OS X
@@ -384,8 +384,7 @@ void MainWindow::updateWindowTitle() {
 
 void MainWindow::updateToolbar() {
 	bool layoutIsCustom = g.s.wlWindowLayout == Settings::LayoutCustom;
-
-	qtIconToolbar->setMovable(layoutIsCustom);
+	qtIconToolbar->setMovable(layoutIsCustom && !g.s.bLockLayout);
 
 	// Update the toolbar so the movable flag takes effect.
 	if (layoutIsCustom) {
@@ -619,7 +618,7 @@ void MainWindow::updateTransmitModeComboBox() {
 }
 
 QMenu *MainWindow::createPopupMenu() {
-	if (g.s.wlWindowLayout == Settings::LayoutCustom) {
+	if ((g.s.wlWindowLayout == Settings::LayoutCustom) && !g.s.bLockLayout) {
 		return QMainWindow::createPopupMenu();
 	}
 

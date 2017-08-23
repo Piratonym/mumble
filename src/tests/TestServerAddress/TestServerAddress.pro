@@ -3,4 +3,10 @@
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
 
-DIST *= DS_Store codesign-requirements.tmpl osxdist.py build-overlay-installer gendmg.pl
+include(../test.pri)
+
+QT += network
+
+TARGET = TestServerAddress
+SOURCES = TestServerAddress.cpp ServerAddress.cpp HostAddress.cpp
+HEADERS = ServerAddress.h HostAddress.h
