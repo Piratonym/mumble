@@ -1,4 +1,4 @@
-// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Copyright 2005-2018 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -273,7 +273,7 @@ struct Settings {
 	bool bEnableUIAccess;
 	QList<Shortcut> qlShortcuts;
 
-	enum MessageLog { LogNone = 0x00, LogConsole = 0x01, LogTTS = 0x02, LogBalloon = 0x04, LogSoundfile = 0x08};
+	enum MessageLog { LogNone = 0x00, LogConsole = 0x01, LogTTS = 0x02, LogBalloon = 0x04, LogSoundfile = 0x08, LogHighlight = 0x10 };
 	int iMaxLogBlocks;
 	QMap<int, QString> qmMessageSounds;
 	QMap<int, quint32> qmMessages;
@@ -331,6 +331,19 @@ struct Settings {
 	ProxyType ptProxyType;
 	QString qsProxyHost, qsProxyUsername, qsProxyPassword;
 	unsigned short usProxyPort;
+
+	/// The ping interval in milliseconds. The Mumble client
+	/// will regularly send TCP and UDP pings to the remote
+	/// server. This setting specifies the time (in milliseconds)
+	/// between each ping message.
+	int iPingIntervalMsec;
+
+	/// The connection timeout duration in milliseconds.
+	/// If a connection is not fully established to the
+	/// server within this duration, the client will
+	/// forcefully disconnect.
+	int iConnectionTimeoutDurationMsec;
+
 	/// bUdpForceTcpAddr forces Mumble to bind its UDP
 	/// socket to the same address as its TCP
 	/// connection is using.

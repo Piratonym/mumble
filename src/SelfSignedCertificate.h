@@ -1,4 +1,4 @@
-// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Copyright 2005-2018 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -10,9 +10,11 @@
 #include <QtNetwork/QSslCertificate>
 #include <QtNetwork/QSslKey>
 
+enum CertificateType { CertificateTypeServerCertificate, CertificateTypeClientCertificate };
+
 class SelfSignedCertificate {
 private:
-	static bool generate(QString clientCertName, QString clientCertEmail, QSslCertificate &qscCert, QSslKey &qskKey);
+	static bool generate(CertificateType certificateType, QString clientCertName, QString clientCertEmail, QSslCertificate &qscCert, QSslKey &qskKey);
 
 public:
 	static bool generateMumbleCertificate(QString name, QString email, QSslCertificate &qscCert, QSslKey &qskKey);

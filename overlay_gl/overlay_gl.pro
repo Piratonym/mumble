@@ -1,4 +1,4 @@
-# Copyright 2005-2017 The Mumble Developers. All rights reserved.
+# Copyright 2005-2018 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -57,14 +57,9 @@ macx {
   LIBS *= -lmach-override
 }
 
-CONFIG(debug, debug|release) {
-  QMAKE_LIBDIR = ../debug$(DESTDIR_ADD) $$QMAKE_LIBDIR
-  DESTDIR = ../debug$(DESTDIR_ADD)
-}
 
-CONFIG(release, debug|release) {
-  QMAKE_LIBDIR = ../release$(DESTDIR_ADD) $$QMAKE_LIBDIR
-  DESTDIR = ../release$(DESTDIR_ADD)
-}
+DESTDIR = $$DESTDIR$(DESTDIR_ADD)
+
+QMAKE_LIBDIR = $$DESTDIR $$QMAKE_LIBDIR
 
 include(../qmake/symbols.pri)

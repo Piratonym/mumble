@@ -1,4 +1,4 @@
-// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Copyright 2005-2018 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -45,6 +45,7 @@
 #include "Settings.h"
 #include "Themes.h"
 #include "SSLCipherInfo.h"
+#include "SvgIcon.h"
 
 #ifdef Q_OS_WIN
 #include "TaskList.h"
@@ -63,37 +64,25 @@ OpenURLEvent::OpenURLEvent(QUrl u) : QEvent(static_cast<QEvent::Type>(OU_QEVENT)
 }
 
 MainWindow::MainWindow(QWidget *p) : QMainWindow(p) {
-	qiIconMuteSelf.addFile(QLatin1String("skin:muted_self.svg"));
-	qiIconMuteServer.addFile(QLatin1String("skin:muted_server.svg"));
-	qiIconMuteSuppressed.addFile(QLatin1String("skin:muted_suppressed.svg"));
-	qiIconMutePushToMute.addFile(QLatin1String("skin:muted_pushtomute.svg"));
-	qiIconDeafSelf.addFile(QLatin1String("skin:deafened_self.svg"));
-	qiIconDeafServer.addFile(QLatin1String("skin:deafened_server.svg"));
-	qiTalkingOff.addFile(QLatin1String("skin:talking_off.svg"));
-	qiTalkingOn.addFile(QLatin1String("skin:talking_on.svg"));
-	qiTalkingShout.addFile(QLatin1String("skin:talking_alt.svg"));
-	qiTalkingWhisper.addFile(QLatin1String("skin:talking_whisper.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconMuteSelf, QLatin1String("skin:muted_self.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconMuteServer, QLatin1String("skin:muted_server.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconMuteSuppressed, QLatin1String("skin:muted_suppressed.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconMutePushToMute, QLatin1String("skin:muted_pushtomute.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconDeafSelf, QLatin1String("skin:deafened_self.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiIconDeafServer, QLatin1String("skin:deafened_server.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiTalkingOff, QLatin1String("skin:talking_off.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiTalkingOn, QLatin1String("skin:talking_on.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiTalkingShout, QLatin1String("skin:talking_alt.svg"));
+	SvgIcon::addSvgPixmapsToIcon(qiTalkingWhisper, QLatin1String("skin:talking_whisper.svg"));
 
 #ifdef Q_OS_MAC
 	if (QFile::exists(QLatin1String("skin:mumble.icns")))
 		qiIcon.addFile(QLatin1String("skin:mumble.icns"));
 	else
-		qiIcon.addFile(QLatin1String("skin:mumble.svg"));
+		SvgIcon::addSvgPixmapsToIcon(qiIcon, QLatin1String("skin:mumble.svg"));
 #else
 	{
-		QSvgRenderer svg(QLatin1String("skin:mumble.svg"));
-		QPixmap original(512,512);
-		original.fill(Qt::transparent);
-
-		QPainter painter(&original);
-		painter.setRenderHint(QPainter::Antialiasing);
-		painter.setRenderHint(QPainter::TextAntialiasing);
-		painter.setRenderHint(QPainter::SmoothPixmapTransform);
-		painter.setRenderHint(QPainter::HighQualityAntialiasing);
-		svg.render(&painter);
-
-		for (int sz=8;sz<=256;sz+=8)
-			qiIcon.addPixmap(original.scaled(sz,sz, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+		SvgIcon::addSvgPixmapsToIcon(qiIcon, QLatin1String("skin:mumble.svg"));
 	}
 
 	// Set application icon except on MacOSX, where the window-icon
@@ -603,6 +592,12 @@ void MainWindow::updateTrayIcon() {
 	}
 }
 
+void MainWindow::updateUserModel()
+{
+	UserModel *um = static_cast<UserModel *>(qtvUsers->model());
+	um->toggleChannelFiltered(NULL); // Force a UI refresh
+}
+
 void MainWindow::updateTransmitModeComboBox() {
 	switch (g.s.atTransmit) {
 		case Settings::Continuous:
@@ -811,6 +806,7 @@ static void recreateServerHandler() {
 	g.sh = sh;
 	g.mw->connect(sh.get(), SIGNAL(connected()), g.mw, SLOT(serverConnected()));
 	g.mw->connect(sh.get(), SIGNAL(disconnected(QAbstractSocket::SocketError, QString)), g.mw, SLOT(serverDisconnected(QAbstractSocket::SocketError, QString)));
+	g.mw->connect(sh.get(), SIGNAL(error(QAbstractSocket::SocketError, QString)), g.mw, SLOT(resolverError(QAbstractSocket::SocketError, QString)));
 }
 
 void MainWindow::openUrl(const QUrl &url) {
@@ -2312,9 +2308,7 @@ void MainWindow::on_qaAudioReset_triggered() {
 
 void MainWindow::on_qaFilterToggle_triggered() {	
 	g.s.bFilterActive = qaFilterToggle->isChecked();
-
-	UserModel *um = static_cast<UserModel *>(qtvUsers->model());
-	um->toggleChannelFiltered(NULL); // force a UI refresh
+	updateUserModel();
 }
 
 void MainWindow::on_qaAudioMute_triggered() {
@@ -2414,9 +2408,7 @@ void MainWindow::on_qaConfigDialog_triggered() {
 		setupView(false);
 		updateTransmitModeComboBox();
 		updateTrayIcon();
-
-		UserModel *um = static_cast<UserModel *>(qtvUsers->model());
-		um->toggleChannelFiltered(NULL); // force a UI refresh
+		updateUserModel();
 		
 		if (g.s.requireRestartToApply) {
 			if (g.s.requireRestartToApply && QMessageBox::question(
@@ -2523,6 +2515,7 @@ void MainWindow::pttReleased() {
 void MainWindow::on_PushToMute_triggered(bool down, QVariant) {
 	g.bPushToMute = down;
 	updateTrayIcon();
+	updateUserModel();
 }
 
 void MainWindow::on_VolumeUp_triggered(bool down, QVariant) {
@@ -3044,6 +3037,21 @@ void MainWindow::serverDisconnected(QAbstractSocket::SocketError err, QString re
 	}
 	qstiIcon->setToolTip(tr("Mumble -- %1").arg(QLatin1String(MUMBLE_RELEASE)));
 	AudioInput::setMaxBandwidth(-1);
+}
+
+void MainWindow::resolverError(QAbstractSocket::SocketError, QString reason) {
+	if (! reason.isEmpty()) {
+		g.l->log(Log::ServerDisconnected, tr("Server connection failed: %1.").arg(Qt::escape(reason)));
+	}  else {
+		g.l->log(Log::ServerDisconnected, tr("Server connection failed."));
+	}
+
+	if (g.s.bReconnect) {
+		qaServerDisconnect->setEnabled(true);
+		if (bRetryServer) {
+			qtReconnect->start();
+		}
+	}
 }
 
 void MainWindow::trayAboutToShow() {

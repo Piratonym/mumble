@@ -1,4 +1,4 @@
-# Copyright 2005-2017 The Mumble Developers. All rights reserved.
+# Copyright 2005-2018 The Mumble Developers. All rights reserved.
 # Use of this source code is governed by a BSD-style license
 # that can be found in the LICENSE file at the root of the
 # Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -140,7 +140,8 @@ HEADERS *= BanEditor.h \
     widgets/MUComboBox.h \
     DeveloperConsole.h \
     PathListWidget.h \
-    XMLTools.h
+    XMLTools.h \
+    SvgIcon.h
 
 SOURCES *= BanEditor.cpp \
     ACLEditor.cpp \
@@ -208,7 +209,8 @@ SOURCES *= BanEditor.cpp \
     widgets/MUComboBox.cpp \
     DeveloperConsole.cpp \
     PathListWidget.cpp \
-    XMLTools.cpp
+    XMLTools.cpp \
+    SvgIcon.cpp
 
 CONFIG(qtspeech) {
   SOURCES *= TextToSpeech.cpp
@@ -444,14 +446,8 @@ win32 {
 
 unix {
   HAVE_PULSEAUDIO=$$system(pkg-config --modversion --silence-errors libpulse)
-  HAVE_PORTAUDIO=$$system(pkg-config --modversion --silence-errors portaudio-2.0)
-
-  !isEmpty(HAVE_PORTAUDIO):!CONFIG(no-portaudio) {
-    CONFIG *= portaudio
-  }
 
   !isEmpty(HAVE_PULSEAUDIO):!CONFIG(no-pulseaudio) {
-    CONFIG -= portaudio
     CONFIG *= pulseaudio
   }
 

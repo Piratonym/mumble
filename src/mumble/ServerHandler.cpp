@@ -1,4 +1,4 @@
-// Copyright 2005-2017 The Mumble Developers. All rights reserved.
+// Copyright 2005-2018 The Mumble Developers. All rights reserved.
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file at the root of the
 // Mumble source tree or at <https://www.mumble.info/LICENSE>.
@@ -295,6 +295,7 @@ void ServerHandler::run() {
 		int ret = exec();
 		if (ret < 0) {
 			qWarning("ServerHandler: failed to resolve hostname");
+			emit error(QAbstractSocket::HostNotFoundError, tr("Unable to resolve hostname"));
 			return;
 		}
 	}
@@ -352,7 +353,7 @@ void ServerHandler::run() {
 		// Setup ping timer;
 		QTimer *ticker = new QTimer(this);
 		connect(ticker, SIGNAL(timeout()), this, SLOT(sendPing()));
-		ticker->start(5000);
+		ticker->start(g.s.iPingIntervalMsec);
 
 		g.mw->rtLast = MumbleProto::Reject_RejectType_None;
 
@@ -458,6 +459,11 @@ void ServerHandler::sendPingInternal() {
 		return;
 
 	if (qtsSock->state() != QAbstractSocket::ConnectedState) {
+		return;
+	}
+
+	// Ensure the TLS handshake has completed before sending pings.
+	if (!qtsSock->isEncrypted()) {
 		return;
 	}
 
@@ -619,7 +625,7 @@ void ServerHandler::serverConnectionStateChanged(QAbstractSocket::SocketState st
 		tConnectionTimeoutTimer = new QTimer();
 		connect(tConnectionTimeoutTimer, SIGNAL(timeout()), this, SLOT(serverConnectionTimeoutOnConnect()));
 		tConnectionTimeoutTimer->setSingleShot(true);
-		tConnectionTimeoutTimer->start(30000);
+		tConnectionTimeoutTimer->start(g.s.iConnectionTimeoutDurationMsec);
 	} else if (state == QAbstractSocket::ConnectedState) {
 		// Start TLS handshake
 		qtsSock->startClientEncryption();
